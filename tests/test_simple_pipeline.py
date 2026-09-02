@@ -1,0 +1,258 @@
+"""End-to-end integration test for `rna_masshunter.simple_pipeline.run()`.
+
+Builds a minimal synthetic mzML by hand (pyteomics has no mzML writer, so
+this constructs the XML directly: base64/float64-encoded binary arrays plus
+just enough cvParam elements for `pyteomics.mzml.MzML` — which itself
+requires the `psims` package, see requirements.txt — to parse ms level, m/z
+array, intensity array, scan start time, and (for MS2) precursor m/z/charge).
+Everything the test asserts against (fragment mass, theoretical MS2 ion m/z)
+is computed via the real vendored/new functions rather than hardcoded, so
+the test stays correct if e.g. base_masses.yaml or the digestion rules
+change.
+"""
+from __future__ import annotations
+
+import base64
+import struct
+import textwrap
+from pathlib import Path
+
+import openpyxl
+import pytest
+
+from rna_masshunter import simple_pipeline
+from rna_masshunter.config import load_config, resolve_paths
+from rna_masshunter.digestion import digest_sequence
+from rna_masshunter.masses import load_base_masses, mz_from_neutral_mass
+from rna_masshunter.ms2_extraction import generate_theoretical_ms2_ions
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+SEQUENCE = "GGGCGUGUGGCGUAGUCGGUAGCGCGCUCCCUUAGCAUGGGAGAGGUCUCCGGUUCGAUUCCGGACUCGUCCACCA"
+M1A_SHIFT_DA = 14.0156  # matches data/modifications.yaml's m1A mass_shift_from_unmodified
+
+
+# --- minimal synthetic mzML writer (pyteomics has no writer) ----------------
+
+def _encode_f64(values: list[float]) -> str:
+    return base64.b64encode(struct.pack(f"<{len(values)}d", *values)).decode("ascii")
+
+
+def _binary_array_xml(values: list[float], accession: str, name: str) -> str:
+    encoded = _encode_f64(values)
+    return (
+        f'<binaryDataArray encodedLength="{len(encoded)}">'
+        '<cvParam cvRef="MS" accession="MS:1000523" name="64-bit float" value=""/>'
+        '<cvParam cvRef="MS" accession="MS:1000576" name="no compression" value=""/>'
+        f'<cvParam cvRef="MS" accession="{accession}" name="{name}" value=""/>'
+        f"<binary>{encoded}</binary></binaryDataArray>"
+    )
+
+
+def _spectrum_xml(index, scan_id, ms_level, rt_minutes, mzs, intensities, precursor_mz=None, precursor_charge=None) -> str:
+    precursor_xml = ""
+    if precursor_mz is not None:
+        precursor_xml = (
+            '<precursorList count="1"><precursor><selectedIonList count="1"><selectedIon>'
+            f'<cvParam cvRef="MS" accession="MS:1000744" name="selected ion m/z" value="{precursor_mz}"/>'
+            f'<cvParam cvRef="MS" accession="MS:1000041" name="charge state" value="{precursor_charge}"/>'
+            "</selectedIon></selectedIonList></precursor></precursorList>"
+        )
+    return (
+        f'<spectrum index="{index}" id="{scan_id}" defaultArrayLength="{len(mzs)}">'
+        f'<cvParam cvRef="MS" accession="MS:1000511" name="ms level" value="{ms_level}"/>'
+        '<scanList count="1"><cvParam cvRef="MS" accession="MS:1000795" name="no combination" value=""/>'
+        '<scan><cvParam cvRef="MS" accession="MS:1000016" name="scan start time" '
+        f'value="{rt_minutes}" unitCvRef="UO" unitAccession="UO:0000031" unitName="minute"/></scan></scanList>'
+        f"{precursor_xml}"
+        '<binaryDataArrayList count="2">'
+        f'{_binary_array_xml(mzs, "MS:1000514", "m/z array")}'
+        f'{_binary_array_xml(intensities, "MS:1000515", "intensity array")}'
+        "</binaryDataArrayList></spectrum>"
+    )
+
+
+def _write_mzml(path: Path, spectra: list[dict]) -> None:
+    body = "".join(
+        _spectrum_xml(i, s["id"], s["ms_level"], s["rt"], s["mzs"], s["intensities"], s.get("precursor_mz"), s.get("precursor_charge"))
+        for i, s in enumerate(spectra)
+    )
+    xml = (
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<mzML xmlns="http://psi.hupo.org/ms/mzml" version="1.1.0">'
+        '<cvList count="2">'
+        '<cv id="MS" fullName="PSI-MS" version="4.1.0" URI="https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo"/>'
+        '<cv id="UO" fullName="UNIT-ONTOLOGY" version="09:04:2014" URI="http://obo.cvs.sourceforge.net/obo/obo/ontology/phenotype/unit.obo"/>'
+        "</cvList>"
+        '<fileDescription><fileContent><cvParam cvRef="MS" accession="MS:1000579" name="MS1 spectrum" value=""/></fileContent></fileDescription>'
+        '<softwareList count="1"><software id="sw1" version="1.0"/></softwareList>'
+        '<instrumentConfigurationList count="1"><instrumentConfiguration id="IC1"/></instrumentConfigurationList>'
+        '<dataProcessingList count="1"><dataProcessing id="dp1"><processingMethod order="1" softwareRef="sw1"/></dataProcessing></dataProcessingList>'
+        f'<run id="run1"><spectrumList count="{len(spectra)}" defaultDataProcessingRef="dp1">{body}</spectrumList></run>'
+        "</mzML>"
+    )
+    path.write_text(xml, encoding="utf-8")
+
+
+# --- fixture: figure out the target fragment + its theoretical MS2 ions -----
+
+@pytest.fixture(scope="module")
+def target_fragment_and_ions():
+    """Digest SEQUENCE with the same settings the test config.yaml uses, and
+    compute the first fragment's theoretical d/w/a/z ions for real (not
+    hardcoded), so the synthetic MS2 peaks below are guaranteed to match."""
+    config = load_config(REPO_ROOT / "config.yaml")
+    config.sequence["sequence"] = SEQUENCE
+    config.digestion.update({"enzyme": "RNase_T1", "missed_cleavages": 1, "min_length": 2})
+    base_masses = load_base_masses(REPO_ROOT / "data" / "base_masses.yaml")
+
+    fragments = digest_sequence(
+        target_id="IntegrationTest", sequence=SEQUENCE,
+        position_map={i: i for i in range(1, len(SEQUENCE) + 1)},
+        config=config, base_masses=base_masses,
+    )
+    fragment = fragments[0]
+    assert len(fragment.sequence) >= 2  # otherwise generate_theoretical_ms2_ions would yield nothing
+
+    ions = generate_theoretical_ms2_ions([fragment], config, base_masses)
+    assert ions, "expected at least one theoretical MS2 ion for the target fragment"
+    return fragment, ions
+
+
+@pytest.fixture
+def config_yaml_text(tmp_path):
+    def _make(mzml_path: Path, output_dir: Path, ms2_enabled: bool) -> Path:
+        text = textwrap.dedent(f"""
+            sequence:
+              name: IntegrationTest
+              sequence: {SEQUENCE}
+            instrument:
+              polarity: negative
+            digestion:
+              enzyme: RNase_T1
+              missed_cleavages: 1
+              min_length: 2
+            input:
+              mzml_path: {mzml_path}
+            project:
+              output_dir: {output_dir}
+            ms1_peak_extraction:
+              mz_min: 0
+              mz_max: 5000
+              intensity_threshold: 0
+            ms2_annotation:
+              enabled: {"true" if ms2_enabled else "false"}
+            reporting:
+              excel_output: true
+        """)
+        config_path = tmp_path / f"config_{'ms2' if ms2_enabled else 'ms1only'}.yaml"
+        config_path.write_text(text, encoding="utf-8")
+        return config_path
+
+    return _make
+
+
+def _build_synthetic_mzml(tmp_path, fragment, ions) -> Path:
+    unmodified_mz = mz_from_neutral_mass(fragment.unmodified_mass, 2, "negative")
+    modified_mz = mz_from_neutral_mass(fragment.unmodified_mass + M1A_SHIFT_DA, 2, "negative")
+
+    ms2_ions = [ion for ion in ions if ion.parent_fragment_id == fragment.fragment_id][:2]
+    ms2_mzs = [ion.theoretical_mz for ion in ms2_ions]
+
+    mzml_path = tmp_path / "synthetic.mzML"
+    _write_mzml(mzml_path, [
+        {"id": "scan=1", "ms_level": 1, "rt": 3.0, "mzs": [unmodified_mz], "intensities": [1000.0]},
+        {"id": "scan=2", "ms_level": 1, "rt": 3.5, "mzs": [modified_mz], "intensities": [1200.0]},
+        {
+            "id": "scan=3", "ms_level": 2, "rt": 3.5, "mzs": ms2_mzs, "intensities": [500.0] * len(ms2_mzs),
+            "precursor_mz": modified_mz, "precursor_charge": 2,
+        },
+    ])
+    return mzml_path
+
+
+def test_pipeline_runs_end_to_end_with_ms2(tmp_path, config_yaml_text, target_fragment_and_ions):
+    fragment, ions = target_fragment_and_ions
+    output_dir = tmp_path / "output"
+    mzml_path = _build_synthetic_mzml(tmp_path, fragment, ions)
+    config_path = config_yaml_text(mzml_path, output_dir, ms2_enabled=True)
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    assert result["output_path"]
+    output_path = Path(result["output_path"])
+    assert output_path.exists()
+
+    rows = result["mass_comparison_rows"]
+    assert rows
+    matching_rows = [row for row in rows if row.fragment_id == fragment.fragment_id and row.charge == 2]
+    assert matching_rows
+
+    unmodified_row = next((row for row in matching_rows if row.delta_da == pytest.approx(0.0, abs=1e-3)), None)
+    assert unmodified_row is not None
+    assert unmodified_row.recommended_formula == "0"
+    # Not asserting known_modification is None here: pseudouridine (an
+    # isomer, mass_shift_from_unmodified == 0) is a legitimate Modification
+    # Candidate match at ΔDa == 0 — that's correct behavior of the known-
+    # modification search, not a bug.
+
+    modified_row = next((row for row in matching_rows if row.delta_da == pytest.approx(M1A_SHIFT_DA, abs=1e-2)), None)
+    assert modified_row is not None
+    assert modified_row.known_modification is not None
+    assert "m1A" in modified_row.modification_candidates
+    # MS2 reference info should have attached to the modified-precursor row
+    # (that's the one the synthetic MS2 spectrum's precursor_mz matches),
+    # and it must not have changed the Formula/Modification verdict (原則3).
+    assert modified_row.ms2_matched_ion_count > 0
+    assert modified_row.ms2_matched_ions != ""
+    assert "m1A" in modified_row.modification_candidates
+
+    wb = openpyxl.load_workbook(output_path)
+    assert wb.sheetnames == ["01_Index", "02_Input", "03_Theoretical", "04_Observed_Mass", "05_Mass_Intensity", "06_Mass_Comparison", "07_Modifications", "08_Visualization"]
+    ms2_header = [cell.value for cell in wb["06_Mass_Comparison"][3]]
+    assert "MS2 Spectrum ID" in ms2_header
+    assert "MS2 Matched Ions" in ms2_header
+    # 01_Index backlinks/hyperlinks are wired (§16.3)
+    assert wb["02_Input"]["A1"].value == "← Back to Index"
+    assert wb["02_Input"]["A1"].hyperlink is not None
+
+
+def test_pipeline_ms2_disabled_matches_ms1_only_behavior(tmp_path, config_yaml_text, target_fragment_and_ions):
+    """仕様書 §20: config.ms2_annotation.enabled=false でもMS1のみのフロー
+    と同じ結果になり（回帰しない）、MS2列は常に既定値のまま。"""
+    fragment, ions = target_fragment_and_ions
+    output_dir = tmp_path / "output"
+    mzml_path = _build_synthetic_mzml(tmp_path, fragment, ions)
+    config_path = config_yaml_text(mzml_path, output_dir, ms2_enabled=False)
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    assert result["ms2_spectra"] == []
+    rows = result["mass_comparison_rows"]
+    assert rows
+    for row in rows:
+        assert row.ms2_spectrum_id is None
+        assert row.ms2_matched_ion_count == 0
+        assert row.ms2_matched_ions == ""
+
+    modified_row = next(
+        (row for row in rows if row.fragment_id == fragment.fragment_id and row.charge == 2 and row.delta_da == pytest.approx(M1A_SHIFT_DA, abs=1e-2)),
+        None,
+    )
+    assert modified_row is not None
+    assert modified_row.known_modification is not None
+    assert "m1A" in modified_row.modification_candidates
+
+
+def test_pipeline_dry_run_without_mzml_completes_with_warnings(tmp_path, config_yaml_text):
+    output_dir = tmp_path / "output"
+    config_path = config_yaml_text(mzml_path="", output_dir=output_dir, ms2_enabled=True)
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    assert result["fragments"]
+    assert result["peaks"] == []
+    assert result["mass_comparison_rows"] == []
+    assert any(w["Source"] == "simple_pipeline" and "mzml_path" in w["Message"] for w in result["warnings"])
+    # Excel is still produced (with 04-06 sheets empty) even without mzML.
+    assert result["output_path"]
+    assert Path(result["output_path"]).exists()
