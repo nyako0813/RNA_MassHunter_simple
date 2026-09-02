@@ -21,10 +21,15 @@ def _fragment(fragment_id: str, sequence: str, mass: float) -> Fragment:
     )
 
 
+# 2026-09-02訂正: mass_comparisonは mz_tolerance_ppm ではなく
+# max_delta_da(絶対質量幅)で探索する(§8.2, §9.2, §12.5)。ここでは
+# FRAG_A(1200.15 Da)とFRAG_B(1300.25 Da)が約100 Da離れているフィクス
+# チャ設計を壊さないよう、テストでは対象修飾(14〜16 Da程度)は十分カバー
+# しつつ隣接フラグメントとは混線しない50 Daを既定値として使う。
 def _config(**overrides) -> RunConfig:
     config = RunConfig(
         instrument={"polarity": "negative"},
-        fragment_mapping={"enabled": True, "mz_tolerance_ppm": 10, "min_charge": 1, "max_charge": 3, "polarity": "auto"},
+        fragment_mapping={"enabled": True, "min_charge": 1, "max_charge": 3, "polarity": "auto"},
         formula_candidate={
             "enabled": True, "max_total_atoms": 7,
             "elements": ["C", "H", "N", "O", "P", "S", "Se"],
@@ -32,7 +37,7 @@ def _config(**overrides) -> RunConfig:
             "mass_tolerance_da": 0.01, "max_candidates_per_match": 10,
             "include_zero_delta_as_match": True,
         },
-        mass_comparison={"enabled": True, "mz_tolerance_ppm": 10},
+        mass_comparison={"enabled": True, "max_delta_da": 50, "max_matches_per_fragment": 50},
         ms2_annotation={"enabled": False},
     )
     for key, value in overrides.items():
@@ -140,7 +145,7 @@ def test_disabled_mass_comparison_returns_empty_list(synthetic_fragments, synthe
     fragment = synthetic_fragments[0]
     mz = mz_from_neutral_mass(fragment.unmodified_mass, 2, "negative")
     peaks = [Peak(mz=mz, intensity=1000.0)]
-    config = _config(mass_comparison={"enabled": False, "mz_tolerance_ppm": 10})
+    config = _config(mass_comparison={"enabled": False, "max_delta_da": 50, "max_matches_per_fragment": 50})
 
     assert build_mass_comparison_rows(synthetic_fragments, peaks, synthetic_modifications, config) == []
 
@@ -166,3 +171,58 @@ def test_include_zero_delta_as_match_false_drops_exact_matches(synthetic_fragmen
     config.formula_candidate = dict(config.formula_candidate, include_zero_delta_as_match=False)
 
     assert build_mass_comparison_rows(synthetic_fragments, peaks, synthetic_modifications, config) == []
+
+
+def test_wide_window_finds_large_modification_shift_peak(synthetic_fragments):
+    """仕様書 §12.5 の回帰テスト: 2026-09-02より前の実装は理論m/zの狭い
+    ppm窓で探索しており、+40 Daのような大きな修飾シフトを持つピークを
+    決して検出できなかった。max_delta_da=50の窓に収まる+40 Daのシフト
+    が正しく検出されることを確認する。"""
+    fragment = synthetic_fragments[0]
+    charge = 2
+    modified_mass = fragment.unmodified_mass + 40.0
+    mz = mz_from_neutral_mass(modified_mass, charge, "negative")
+    peaks = [Peak(mz=mz, intensity=1500.0)]
+
+    rows = build_mass_comparison_rows(synthetic_fragments, peaks, [], _config())
+
+    assert len(rows) == 1
+    row = rows[0]
+    assert row.fragment_id == "FRAG_A"
+    assert row.delta_da == pytest.approx(40.0, abs=1e-3)
+
+
+def test_peak_beyond_max_delta_da_is_excluded(synthetic_fragments):
+    """max_delta_daより外側のピークは、修飾検出の対象としても採用しない
+    ことを確認する(探索範囲そのものがmax_delta_daで決まることの裏返し
+    のテスト)。"""
+    fragment = synthetic_fragments[0]
+    charge = 2
+    too_far_mass = fragment.unmodified_mass + 60.0  # config()の max_delta_da=50 の外側
+    mz = mz_from_neutral_mass(too_far_mass, charge, "negative")
+    peaks = [Peak(mz=mz, intensity=1500.0)]
+
+    # 単一fragmentだけを渡し、他フラグメントとの偶然の質量重なりを排除する
+    rows = build_mass_comparison_rows([fragment], peaks, [], _config())
+
+    assert rows == []
+
+
+def test_max_matches_per_fragment_truncates_to_closest_delta(synthetic_fragments):
+    """1つのfragment×chargeに閾値を超える数のピークがある場合、
+    max_matches_per_fragment件に切り詰められ、|ΔDa|昇順で近い順に
+    残ることを確認する。"""
+    fragment = synthetic_fragments[0]
+    charge = 2
+    shifts = [1.0, 5.0, 10.0, 20.0, 30.0]  # 5 candidates, all within max_delta_da=50
+    peaks = [
+        Peak(mz=mz_from_neutral_mass(fragment.unmodified_mass + shift, charge, "negative"), intensity=100.0)
+        for shift in shifts
+    ]
+    config = _config(mass_comparison={"enabled": True, "max_delta_da": 50, "max_matches_per_fragment": 3})
+
+    rows = build_mass_comparison_rows(synthetic_fragments, peaks, [], config)
+
+    assert len(rows) == 3
+    kept_deltas = sorted(row.delta_da for row in rows)
+    assert kept_deltas == pytest.approx([1.0, 5.0, 10.0], abs=1e-3)

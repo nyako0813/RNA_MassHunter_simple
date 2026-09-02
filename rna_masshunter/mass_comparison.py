@@ -3,8 +3,11 @@
 New module (仕様書 §6, §8.2, §15). Orchestrates existing, independently
 reusable pieces:
 
-- `mass_shift_ms1_search.build_sorted_peak_index` / `find_peaks_near_mz` for
-  the fragment/charge -> peak binary search.
+- `mass_shift_ms1_search.build_sorted_peak_index` for the peak index, plus a
+  local `_find_peaks_in_mz_range` (bisect-based absolute m/z-range search;
+  see 仕様書 §8.2, §12.5 — NOT `find_peaks_near_mz`, whose ppm-relative
+  window around the *unmodified* mass would miss real modifications of
+  14+ Da).
 - `formula_candidate.enumerate_formula_candidates` for Formula Candidates.
 - `modifications.find_modifications_by_mass_shift` for Modification
   Candidates.
@@ -18,6 +21,7 @@ only this module combines their outputs into one row.
 """
 from __future__ import annotations
 
+import bisect
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -28,11 +32,11 @@ from rna_masshunter.formula_candidate import (
     enumerate_formula_candidates,
     get_recommended_formula,
 )
-from rna_masshunter.mass_shift_ms1_search import build_sorted_peak_index, find_peaks_near_mz
-from rna_masshunter.masses import neutral_mass_from_mz
+from rna_masshunter.mass_shift_ms1_search import SortedPeakIndex, build_sorted_peak_index
+from rna_masshunter.masses import mz_from_neutral_mass, neutral_mass_from_mz
 from rna_masshunter.models import Fragment, Modification, Peak, RunConfig
 from rna_masshunter.modifications import find_modifications_by_mass_shift
-from rna_masshunter.ms1_mapping import ppm_error, theoretical_mz_from_mass
+from rna_masshunter.ms1_mapping import ppm_error
 from rna_masshunter.observed_mass import assign_peak_ids
 
 
@@ -97,6 +101,24 @@ def _format_modification_candidates(delta_da: float, candidates: list[Modificati
     return "; ".join(parts)
 
 
+def _find_peaks_in_mz_range(index: SortedPeakIndex, mz_low: float, mz_high: float) -> list[Any]:
+    """仕様書 §8.2, §12.5: `mass_comparison.max_delta_da`(絶対質量幅)から
+    導いたm/z範囲 `[mz_low, mz_high]` に入るピークを二分探索で取得する。
+
+    この範囲がマッチの採否を決める唯一のフィルタであり、
+    `mz_tolerance_ppm`/`formula_candidate.mass_tolerance_da` はここでは
+    一切使わない(それらは採用後の候補一致度・表示にのみ関わる、
+    §11/§12.5参照)。2026-09-02訂正: 以前は理論m/zの狭いppm窓で探索して
+    おり、実際の修飾(14〜288 Da程度のシフト)を持つピークをほぼ検出でき
+    ていなかった。
+    """
+    if not index.mzs or mz_low > mz_high:
+        return []
+    lo = bisect.bisect_left(index.mzs, mz_low)
+    hi = bisect.bisect_right(index.mzs, mz_high)
+    return index.peaks[lo:hi]
+
+
 def build_mass_comparison_rows(
     fragments: list[Fragment],
     peaks: list[Peak],
@@ -106,15 +128,20 @@ def build_mass_comparison_rows(
     ms2_spectra: list[Any] | None = None,
     ms2_ion_index: dict[str, list[Any]] | None = None,
 ) -> list[MassComparisonRow]:
-    """仕様書 §8.2, §7 (data flow) の手順に対応:
+    """仕様書 §8.2, §7 (data flow), §12.5 の手順に対応:
 
     1. build_sorted_peak_index(peaks) でピーク集合を1回だけソート
-    2. fragment x charge ごとに理論m/zを計算し、find_peaks_near_mz でマッチ抽出
+    2. fragment x charge ごとに `[unmodified_mass - max_delta_da,
+       unmodified_mass + max_delta_da]` の絶対質量幅をm/z範囲に変換し、
+       `_find_peaks_in_mz_range` でマッチ抽出(2026-09-02訂正: 狭いppm窓
+       ではなく広い絶対Da幅が主フィルタ。§12.5参照)
     3. マッチごとに観測中性質量・ΔDa・Δppmを計算
     4. formula_candidate.enumerate_formula_candidates / build_modification_candidates
        を独立に呼び出す
     5. (ms2_spectra/ms2_ion_index が渡され、かつ config.ms2_annotation.enabled
        の場合のみ) ms2_support.find_ms2_support で参考情報を追加
+    6. マッチ数が `max_matches_per_fragment` を超える場合は |ΔDa| 昇順で
+       上位のみ残す
     """
     mc_config = config.mass_comparison or {}
     if not mc_config.get("enabled", True):
@@ -128,7 +155,10 @@ def build_mass_comparison_rows(
     polarity = str(fm_config.get("polarity", "auto") or "auto").lower()
     if polarity == "auto":
         polarity = str(config.instrument.get("polarity", "negative") or "negative").lower()
-    tolerance_ppm = float(mc_config.get("mz_tolerance_ppm", 10) or 10)
+    max_delta_da = float(mc_config.get("max_delta_da", 300) or 300)
+    max_matches_per_fragment = mc_config.get("max_matches_per_fragment")
+    if max_matches_per_fragment is not None:
+        max_matches_per_fragment = int(max_matches_per_fragment)
 
     fc_config = config.formula_candidate or {}
     formula_enabled = bool(fc_config.get("enabled", True))
@@ -155,9 +185,20 @@ def build_mass_comparison_rows(
     rows: list[MassComparisonRow] = []
     for fragment in fragments:
         for charge in range(min_charge, max_charge + 1):
-            theoretical_mz = theoretical_mz_from_mass(fragment.unmodified_mass, charge, polarity)
-            for match in find_peaks_near_mz(sorted_index, theoretical_mz, tolerance_ppm):
-                peak = match.peak
+            mass_low = fragment.unmodified_mass - max_delta_da
+            mass_high = fragment.unmodified_mass + max_delta_da
+            mz_bound_a = mz_from_neutral_mass(mass_low, charge, polarity)
+            mz_bound_b = mz_from_neutral_mass(mass_high, charge, polarity)
+            mz_low, mz_high = min(mz_bound_a, mz_bound_b), max(mz_bound_a, mz_bound_b)
+
+            matched_peaks = _find_peaks_in_mz_range(sorted_index, mz_low, mz_high)
+            if max_matches_per_fragment is not None and len(matched_peaks) > max_matches_per_fragment:
+                matched_peaks = sorted(
+                    matched_peaks,
+                    key=lambda p: abs(neutral_mass_from_mz(p.mz, charge, polarity) - fragment.unmodified_mass),
+                )[:max_matches_per_fragment]
+
+            for peak in matched_peaks:
                 observed_mass = neutral_mass_from_mz(peak.mz, charge, polarity)
                 delta_da = calculate_delta_mass(observed_mass, fragment.unmodified_mass)
                 delta_ppm = ppm_error(observed_mass, fragment.unmodified_mass)
