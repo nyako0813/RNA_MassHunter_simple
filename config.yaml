@@ -1,0 +1,86 @@
+# Sample configuration for the RNA_MassHunter simple pipeline.
+# Copy this file and fill in sequence.sequence / input.mzml_path before running.
+# See docs/design/RNA_MassHunter_再設計_実装仕様書.md §9 for the full field reference.
+
+project:
+  name: "RNA_MassHunter_simple"
+  output_dir: "output"
+  log_dir: "logs"
+
+input:
+  mzml_path: ""
+
+sequence:
+  name: "target_tRNA"
+  type: "RNA"
+  sequence: ""
+
+instrument:
+  polarity: "negative"
+
+cca_processing:
+  enabled: true
+  registered_sequence_cca_mode: "EXCLUDES_CCA"
+
+digestion:
+  enabled: true
+  enzyme: "RNase_T1"
+  digestion_mode: "specific"
+  missed_cleavages: 1
+  min_length: 2
+  max_length: null
+  include_terminal_forms: true
+  allow_partial_digestion: true
+  allow_nonspecific_cleavage: false
+
+alkaline_phosphatase:
+  enabled: false
+  assume_complete: false
+  allow_residual_phosphate: true
+  allow_cyclic_phosphate: true
+
+fragment_mapping:
+  enabled: true
+  mz_tolerance_ppm: 10
+  min_charge: 1
+  max_charge: 8
+  polarity: "auto"
+
+ms1_peak_extraction:
+  rt_min: null
+  rt_max: null
+  mz_min: 500
+  mz_max: 3000
+  intensity_threshold: 1000
+
+ms2_annotation:
+  enabled: true
+  mz_tolerance_ppm: 20
+  min_peak_intensity: 10
+  min_relative_intensity_percent: 1.0
+  max_peaks_per_spectrum: 500
+  precursor_match_tolerance_ppm: 20
+  use_theoretical_fragments: true
+  ion_series: ["d", "w", "a", "z"]
+  charge_states: [1]
+  min_ion_length: 1
+  max_ion_length: null
+
+formula_candidate:
+  enabled: true
+  max_total_atoms: 7
+  elements: ["C", "H", "N", "O", "P", "S", "Se"]
+  element_limits: {C: 3, H: 7, N: 3, O: 4, P: 1, S: 1, Se: 1}
+  mass_tolerance_da: 0.01
+  max_candidates_per_match: 10
+  include_zero_delta_as_match: true
+
+mass_comparison:
+  enabled: true
+  mz_tolerance_ppm: 10
+
+reporting:
+  excel_output: true
+  output_filename: "RNA_MassHunter_simple_report.xlsx"
+  max_excel_rows_per_sheet: 100000
+  truncate_large_sheets: true

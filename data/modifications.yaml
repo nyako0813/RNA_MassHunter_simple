@@ -1,0 +1,4136 @@
+schema_version: RNA_MassHunter_modifications_v0.1
+description: PDF-derived modified nucleoside dictionary. PDF-confirmed symbol, Mass(mono), mass_shift_from_unmodified, base/target_bases,
+  and common_name are manually checked by user.
+mass_policy:
+  modified_nucleoside_mass_mono: Use user PDF values.
+  mass_shift_from_unmodified: Use user PDF values.
+  unmodified_rna_base_masses: Use Mongo Oligo-compatible base_masses.yaml; not defined here.
+  old_code_values: Reference only; do not override PDF values.
+modifications:
+- id: m1A
+  symbol: m1A
+  name: 1-methyladenosine
+  short_name: m1A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 281.1124
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2A
+  symbol: m2A
+  name: 2-methyladenosine
+  short_name: m2A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 281.1124
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m6A
+  symbol: m6A
+  name: N6-methyladenosine
+  short_name: m6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 281.1124
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Am
+  symbol: Am
+  name: 2'-O-methyladenosine
+  short_name: Am
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 281.1124
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ms2m6A
+  symbol: ms2m6A
+  name: 2-methylthio-N6-methyladenosine
+  short_name: ms2m6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 327.1001
+  mass_shift_from_unmodified: 60.0033
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: i6A
+  symbol: i6A
+  name: N6-isopentenyladenosine
+  short_name: i6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 335.1594
+  mass_shift_from_unmodified: 68.0626
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ms2i6A
+  symbol: ms2i6A
+  name: 2-methylthio-N6-isopentenyladenosine
+  short_name: ms2i6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 381.1471
+  mass_shift_from_unmodified: 114.0503
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: io6A
+  symbol: io6A
+  name: N6-(cis-hydroxyisopentenyl)adenosine
+  short_name: io6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 351.1543
+  mass_shift_from_unmodified: 84.0575
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ms2io6A
+  symbol: ms2io6A
+  name: 2-methylthio-N6-(cis-hydroxyisopentenyl)adenosine
+  short_name: ms2io6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 397.142
+  mass_shift_from_unmodified: 130.0452
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: g6A
+  symbol: g6A
+  name: N6-glycinylcarbamoyladenosine
+  short_name: g6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 368.108
+  mass_shift_from_unmodified: 101.0112
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: t6A
+  symbol: t6A
+  name: N6-threonylcarbamoyladenosine
+  short_name: t6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 412.1343
+  mass_shift_from_unmodified: 145.0375
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ms2t6A
+  symbol: ms2t6A
+  name: 2-methylthio-N6-threonylcarbamoyladenosine
+  short_name: ms2t6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 458.122
+  mass_shift_from_unmodified: 191.0252
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m6t6A
+  symbol: m6t6A
+  name: N6-methyl-N6-threonylcarbamoyladenosine
+  short_name: m6t6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 426.1499
+  mass_shift_from_unmodified: 159.0531
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: hn6A
+  symbol: hn6A
+  name: N6-hydroxynorvalylcarbamoyladenosine
+  short_name: hn6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 426.1499
+  mass_shift_from_unmodified: 159.0531
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ms2hn6A
+  symbol: ms2hn6A
+  name: 2-methylthio-N6-hydroxynorvalylcarbamoyladenosine
+  short_name: ms2hn6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 472.1376
+  mass_shift_from_unmodified: 205.0408
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Arp
+  symbol: Ar(p)
+  name: 2'-O-ribosyladenosine (phosphate)
+  short_name: Ar(p)
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 479.1053
+  mass_shift_from_unmodified: 212.0085
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m6_6A
+  symbol: m6,6A
+  name: N6,N6-dimethyladenosine
+  short_name: m6,6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 295.1281
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m6Am
+  symbol: m6Am
+  name: N6,2'-O-dimethyladenosine
+  short_name: m6Am
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 295.1281
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m6_6Am
+  symbol: m6,6Am
+  name: N6,N6,2'-O-trimethyladenosine
+  short_name: m6,6Am
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 309.1437
+  mass_shift_from_unmodified: 42.0469
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: trimethylation_or_acetyl_group
+  chemical_group: trimethylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m1Am
+  symbol: m1Am
+  name: 1,2'-O-dimethyladenosine
+  short_name: m1Am
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 295.1281
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ac6A
+  symbol: ac6A
+  name: N6-acetyladenosine
+  short_name: ac6A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 309.1437
+  mass_shift_from_unmodified: 42.0469
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: trimethylation_or_acetyl_group
+  chemical_group: acetylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m8A
+  symbol: m8A
+  name: 8-methyladenosine
+  short_name: m8A
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 281.1124
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: I
+  symbol: I
+  name: inosine
+  short_name: I
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 268.0808
+  mass_shift_from_unmodified: 0.984
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m1I
+  symbol: m1I
+  name: 1-methylinosine
+  short_name: m1I
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 282.0964
+  mass_shift_from_unmodified: 14.9996
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m1Im
+  symbol: m1Im
+  name: 1,2'-O-dimethylinosine
+  short_name: m1Im
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 296.1121
+  mass_shift_from_unmodified: 29.0153
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Im
+  symbol: Im
+  name: 2'-O-methylinosine
+  short_name: Im
+  target_bases:
+  - A
+  category: biological
+  modified_nucleoside_mass_mono: 282.0964
+  mass_shift_from_unmodified: 14.9996
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m3C
+  symbol: m3C
+  name: 3-methylcytidine
+  short_name: m3C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 257.1012
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m5C
+  symbol: m5C
+  name: 5-methylcytidine
+  short_name: m5C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 257.1012
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Cm
+  symbol: Cm
+  name: 2'-O-methylcytidine
+  short_name: Cm
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 257.1012
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: s2C
+  symbol: s2C
+  name: 2-thiocytidine
+  short_name: s2C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 259.0627
+  mass_shift_from_unmodified: 15.9772
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: thionation_group
+  chemical_group: thionation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ac4C
+  symbol: ac4C
+  name: N4-acetylcytidine
+  short_name: ac4C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 285.0961
+  mass_shift_from_unmodified: 42.0106
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: acetylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: f5C
+  symbol: f5C
+  name: 5-formylcytidine
+  short_name: f5C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 271.0804
+  mass_shift_from_unmodified: 27.9949
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m5Cm
+  symbol: m5Cm
+  name: 5,2'-O-dimethylcytidine
+  short_name: m5Cm
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 271.1168
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ac4Cm
+  symbol: ac4Cm
+  name: N4-acetyl-2'-O-methylcytidine
+  short_name: ac4Cm
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 299.1117
+  mass_shift_from_unmodified: 56.0262
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: acetylation_plus_methylation
+  near_isobaric_group: near_isobaric_56Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: k2C
+  symbol: k2C
+  name: lysidine
+  short_name: k2C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 371.1805
+  mass_shift_from_unmodified: 128.095
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m4C
+  symbol: m4C
+  name: N4-methylcytidine
+  short_name: m4C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 257.1012
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 3
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m4Cm
+  symbol: m4Cm
+  name: N4,2'-O-dimethylcytidine
+  short_name: m4Cm
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 271.1168
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: hm5C
+  symbol: hm5C
+  name: 5-hydroxymethylcytidine
+  short_name: hm5C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 273.0961
+  mass_shift_from_unmodified: 30.0106
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: f5Cm
+  symbol: f5Cm
+  name: 5-formyl-2'-O-methylcytidine
+  short_name: f5Cm
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 285.0961
+  mass_shift_from_unmodified: 42.0106
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: formylation_plus_methylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m4_4C
+  symbol: m4,4C
+  name: N4,N4-dimethylcytidine
+  short_name: m4,4C
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 271.1168
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: derived_calculation
+    modified_nucleoside_mass: derived_calculation
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: derived_calculation
+    derived_from: m4_4Cm
+    method: Subtracted the 2'-O-methylation mass shift (+14.0157 Da) from the existing PDF-sourced m4_4Cm (N4,N4,2'-O-trimethylcytidine) mass shift. The resulting 28.0313 Da matches the dimethylation shift already used elsewhere in this catalog for m2_2G and m6_6A, cross-validating the derivation.
+    curation_status: calculated_not_pdf_verified
+  curation:
+    status: calculated_not_pdf_verified
+    notes: Not directly confirmed against a PDF. modified_nucleoside_mass_mono and mass_shift_from_unmodified were calculated as m4_4Cm minus 14.0157 (the 2'-O-methylation shift). This is the base-only (non-2'-O-methylated) counterpart of m4_4Cm, added to support base-loss ion mass decomposition for compound base+sugar modifications. Verify against literature before high-confidence use.
+- id: m4_4Cm
+  symbol: m4,4Cm
+  name: N4,N4,2'-O-trimethylcytidine
+  short_name: m4,4Cm
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 285.1325
+  mass_shift_from_unmodified: 42.047
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: trimethylation_or_acetyl_group
+  chemical_group: trimethylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Cplus
+  symbol: C+
+  name: agmatidine
+  short_name: C+
+  target_bases:
+  - C
+  category: biological
+  modified_nucleoside_mass_mono: 355.1968
+  mass_shift_from_unmodified: 112.1113
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m1G
+  symbol: m1G
+  name: 1-methylguanosine
+  short_name: m1G
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 297.1073
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2G
+  symbol: m2G
+  name: N2-methylguanosine
+  short_name: m2G
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 297.1073
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m7G
+  symbol: m7G
+  name: 7-methylguanosine
+  short_name: m7G
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 297.1073
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Gm
+  symbol: Gm
+  name: 2'-O-methylguanosine
+  short_name: Gm
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 297.1073
+  mass_shift_from_unmodified: 14.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2_2G
+  symbol: m2,2G
+  name: N2,N2-dimethylguanosine
+  short_name: m2,2G
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 311.123
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2Gm
+  symbol: m2Gm
+  name: N2,2'-O-dimethylguanosine
+  short_name: m2Gm
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 311.123
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2_2Gm
+  symbol: m2,2Gm
+  name: N2,N2,2'-O-trimethylguanosine
+  short_name: m2,2Gm
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 325.1386
+  mass_shift_from_unmodified: 42.0469
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: trimethylation_or_acetyl_group
+  chemical_group: trimethylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 4
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Grp
+  symbol: Gr(p)
+  name: 2'-O-ribosylguanosine (phosphate)
+  short_name: Gr(p)
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 495.1003
+  mass_shift_from_unmodified: 212.0086
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: yW
+  symbol: yW
+  name: wybutosine
+  short_name: yW
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 508.1918
+  mass_shift_from_unmodified: 225.1001
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: o2yW
+  symbol: o2yW
+  name: peroxywybutosine
+  short_name: o2yW
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 540.1816
+  mass_shift_from_unmodified: 257.0899
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: OHyW
+  symbol: OHyW
+  name: hydroxywybutosine
+  short_name: OHyW
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 524.1867
+  mass_shift_from_unmodified: 241.095
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: OHyW*
+  symbol: OHyW*
+  name: undermodified hydroxywybutosine
+  short_name: OHyW*
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 452.1656
+  mass_shift_from_unmodified: 169.0739
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: imG
+  symbol: imG
+  name: wyosine
+  short_name: imG
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 335.123
+  mass_shift_from_unmodified: 52.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mimG
+  symbol: mimG
+  name: methylwyosine
+  short_name: mimG
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 349.1386
+  mass_shift_from_unmodified: 66.0469
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2_7G
+  symbol: m2,7G
+  name: N2,7-dimethylguanosine
+  short_name: m2,7G
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 311.123
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2_2_7G
+  symbol: m2,2,7G
+  name: N2,N2,7-trimethylguanosine
+  short_name: m2,2,7G
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 325.1386
+  mass_shift_from_unmodified: 42.0469
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: trimethylation_or_acetyl_group
+  chemical_group: trimethylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m1Gm
+  symbol: m1Gm
+  name: 1,2'-O-dimethylguanosine
+  short_name: m1Gm
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 311.123
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: imG_14
+  symbol: imG-14
+  name: 4-demethylwyosine
+  short_name: imG-14
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 321.1073
+  mass_shift_from_unmodified: 38.0156
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: imG2
+  symbol: imG2
+  name: isowyosine
+  short_name: imG2
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 335.123
+  mass_shift_from_unmodified: 52.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 5
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m2_7Gm
+  symbol: m2,7Gm
+  name: N2,7,2'-O-trimethylguanosine
+  short_name: m2,7Gm
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 325.1386
+  mass_shift_from_unmodified: 42.0469
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: trimethylation_or_acetyl_group
+  chemical_group: trimethylation
+  near_isobaric_group: near_isobaric_42Da_group
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Q
+  symbol: Q
+  name: queuosine
+  short_name: Q
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 409.1597
+  mass_shift_from_unmodified: 126.068
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: oQ
+  symbol: oQ
+  name: epoxyqueuosine
+  short_name: oQ
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 425.1547
+  mass_shift_from_unmodified: 142.063
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: galQ
+  symbol: galQ
+  name: galactosyl-queuosine
+  short_name: galQ
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 571.2126
+  mass_shift_from_unmodified: 288.1209
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: manQ
+  symbol: manQ
+  name: mannosyl-queuosine
+  short_name: manQ
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 571.2126
+  mass_shift_from_unmodified: 288.1209
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: preQ0
+  symbol: preQ0
+  name: 7-cyano-7-deazaguanosine
+  short_name: preQ0
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 307.0917
+  mass_shift_from_unmodified: 24.0
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: preQ0_Lys
+  symbol: preQ0-Lys
+  name: preQ0-Lys
+  short_name: preQ0-Lys
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 453.1972
+  mass_shift_from_unmodified: 170.1055
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: preQ1
+  symbol: preQ1
+  name: 7-aminomethyl-7-deazaguanosine
+  short_name: preQ1
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 311.123
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Gplus
+  symbol: G+
+  name: archaeosine
+  short_name: G+
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 324.1182
+  mass_shift_from_unmodified: 41.0265
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Y
+  symbol: Y
+  name: pseudouridine
+  short_name: Y
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 244.0695
+  mass_shift_from_unmodified: 0.0
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: false
+    ms2: limited
+  isobaric_group: uridine_pseudouridine_isomer_group
+  chemical_group: pseudouridine_related
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: false
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: D
+  symbol: D
+  name: dihydrouridine
+  short_name: D
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 246.0852
+  mass_shift_from_unmodified: 2.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m5U
+  symbol: m5U
+  name: 5-methyluridine
+  short_name: m5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 258.0852
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 6
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Um
+  symbol: Um
+  name: 2'-O-methyluridine
+  short_name: Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 258.0852
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m5Um
+  symbol: m5Um
+  name: 5,2'-O-dimethyluridine
+  short_name: m5Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 272.1008
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m1Y
+  symbol: m1Y
+  name: 1-methylpseudouridine
+  short_name: m1Y
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 258.0852
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: Ym
+  symbol: Ym
+  name: 2'-O-methylpseudouridine
+  short_name: Ym
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 258.0852
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: s2U
+  symbol: s2U
+  name: 2-thiouridine
+  short_name: s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 260.0467
+  mass_shift_from_unmodified: 15.9772
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: thionation_group
+  chemical_group: thionation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: s4U
+  symbol: s4U
+  name: 4-thiouridine
+  short_name: s4U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 260.0467
+  mass_shift_from_unmodified: 15.9772
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: thionation_group
+  chemical_group: thionation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m5s2U
+  symbol: m5s2U
+  name: 5-methyl-2-thiouridine
+  short_name: m5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 274.0623
+  mass_shift_from_unmodified: 29.9928
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: s2Um
+  symbol: s2Um
+  name: 2-thio-2'-O-methyluridine
+  short_name: s2Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 274.0623
+  mass_shift_from_unmodified: 29.9928
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: acp3U
+  symbol: acp3U
+  name: 3-(3-amino-3-carboxypropyl)uridine
+  short_name: acp3U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 345.1172
+  mass_shift_from_unmodified: 101.0477
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ho5U
+  symbol: ho5U
+  name: 5-hydroxyuridine
+  short_name: ho5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 260.0645
+  mass_shift_from_unmodified: 15.995
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mo5U
+  symbol: mo5U
+  name: 5-methoxyuridine
+  short_name: mo5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 274.0801
+  mass_shift_from_unmodified: 30.0106
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: cmo5U
+  symbol: cmo5U
+  name: uridine 5-oxyacetic acid
+  short_name: cmo5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 318.0699
+  mass_shift_from_unmodified: 74.0004
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 7
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mcmo5U
+  symbol: mcmo5U
+  name: uridine 5-oxyacetic acid methyl ester
+  short_name: mcmo5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 332.0856
+  mass_shift_from_unmodified: 88.0161
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: chm5U
+  symbol: chm5U
+  name: 5-(carboxyhydroxymethyl)uridine
+  short_name: chm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 318.0699
+  mass_shift_from_unmodified: 74.0004
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mchm5U
+  symbol: mchm5U
+  name: 5-(carboxyhydroxymethyl)uridine methyl ester
+  short_name: mchm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 332.0856
+  mass_shift_from_unmodified: 88.0161
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mcm5U
+  symbol: mcm5U
+  name: 5-methoxycarbonylmethyluridine
+  short_name: mcm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 316.0907
+  mass_shift_from_unmodified: 72.0212
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mcm5Um
+  symbol: mcm5Um
+  name: 5-methoxycarbonylmethyl-2'-O-methyluridine
+  short_name: mcm5Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 330.1063
+  mass_shift_from_unmodified: 86.0368
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mcm5s2U
+  symbol: mcm5s2U
+  name: 5-methoxycarbonylmethyl-2-thiouridine
+  short_name: mcm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 332.0678
+  mass_shift_from_unmodified: 87.9983
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: nm5s2U
+  symbol: nm5s2U
+  name: 5-aminomethyl-2-thiouridine
+  short_name: nm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 289.0732
+  mass_shift_from_unmodified: 45.0037
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mnm5U
+  symbol: mnm5U
+  name: 5-methylaminomethyluridine
+  short_name: mnm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 287.1117
+  mass_shift_from_unmodified: 43.0422
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mnm5s2U
+  symbol: mnm5s2U
+  name: 5-methylaminomethyl-2-thiouridine
+  short_name: mnm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 303.0889
+  mass_shift_from_unmodified: 59.0194
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: mnm5se2U
+  symbol: mnm5se2U
+  name: 5-methylaminomethyl-2-selenouridine
+  short_name: mnm5se2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 351.0333
+  mass_shift_from_unmodified: 106.9638
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ncm5U
+  symbol: ncm5U
+  name: 5-carbamoylmethyluridine
+  short_name: ncm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 301.091
+  mass_shift_from_unmodified: 57.0215
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: ncm5s2U
+  symbol: ncm5s2U
+  name: 5-carbamoylmethyl-2-thiouridine
+  short_name: ncm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 317.0682
+  mass_shift_from_unmodified: 72.9987
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: derived_calculation
+    modified_nucleoside_mass: derived_calculation
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: derived_calculation
+    derived_from: ncm5U
+    method: Applied the O->S thio-substitution mass shift (+15.9772 Da), already used in this catalog for s2U/s4U, to the existing PDF-sourced ncm5U mass.
+    curation_status: calculated_not_pdf_verified
+  curation:
+    status: calculated_not_pdf_verified
+    notes: Not directly confirmed against a PDF. modified_nucleoside_mass_mono and mass_shift_from_unmodified were calculated as ncm5U + 15.9772 (the O->S shift already used for s2U/s4U in this catalog). Verify against literature before high-confidence use.
+- id: ncm5Um
+  symbol: ncm5Um
+  name: 5-carbamoylmethyl-2'-O-methyluridine
+  short_name: ncm5Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 315.1066
+  mass_shift_from_unmodified: 71.0371
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626183709.pdf
+    page: 8
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: cmnm5U
+  symbol: cmnm5U
+  name: 5-carboxymethylaminomethyluridine
+  short_name: cmnm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 331.1016
+  mass_shift_from_unmodified: 87.0321
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: cmnm5Um
+  symbol: cmnm5Um
+  name: 5-carboxymethylaminomethyl-2'-O-methyluridine
+  short_name: cmnm5Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 345.1172
+  mass_shift_from_unmodified: 101.0477
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: cmnm5s2U
+  symbol: cmnm5s2U
+  name: 5-carboxymethylaminomethyl-2-thiouridine
+  short_name: cmnm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 347.0787
+  mass_shift_from_unmodified: 103.0092
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m3U
+  symbol: m3U
+  name: 3-methyluridine
+  short_name: m3U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 258.0852
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m1acp3Y
+  symbol: m1acp3Y
+  name: 1-methyl-3-(3-amino-3-carboxypropyl)pseudouridine
+  short_name: m1acp3Y
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 359.1329
+  mass_shift_from_unmodified: 115.0634
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: uridine_pseudouridine_isomer_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: cm5U
+  symbol: cm5U
+  name: 5-carboxymethyluridine
+  short_name: cm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 302.075
+  mass_shift_from_unmodified: 58.0055
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m3Um
+  symbol: m3Um
+  name: 3,2'-O-dimethyluridine
+  short_name: m3Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 272.1008
+  mass_shift_from_unmodified: 28.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: dimethylation_group
+  chemical_group: dimethylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m5D
+  symbol: m5D
+  name: 5-methyldihydrouridine
+  short_name: m5D
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 260.1008
+  mass_shift_from_unmodified: 16.0313
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: m3Y
+  symbol: m3Y
+  name: 3-methylpseudouridine
+  short_name: m3Y
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 258.0852
+  mass_shift_from_unmodified: 14.0157
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: methylation_group
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: tm5U
+  symbol: tm5U
+  name: 5-taurinomethyluridine
+  short_name: tm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 381.0842
+  mass_shift_from_unmodified: 137.0147
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: tm5s2U
+  symbol: tm5s2U
+  name: 5-taurinomethyl-2-thiouridine
+  short_name: tm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 397.0614
+  mass_shift_from_unmodified: 152.9919
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: inm5U
+  symbol: inm5U
+  name: 5-(isopentenylaminomethyl)uridine
+  short_name: inm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 341.1587
+  mass_shift_from_unmodified: 97.0892
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 1
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: inm5s2U
+  symbol: inm5s2U
+  name: 5-(isopentenylaminomethyl)-2-thiouridine
+  short_name: inm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 357.1358
+  mass_shift_from_unmodified: 113.0663
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: inm5Um
+  symbol: inm5Um
+  name: 5-(isopentenylaminomethyl)-2'-O-methyluridine
+  short_name: inm5Um
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 355.1743
+  mass_shift_from_unmodified: 111.1048
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: gmnm5s2U
+  symbol: gmnm5s2U
+  name: geranylated 5-methylaminomethyl-2-thiouridine
+  short_name: gmnm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 439.2141
+  mass_shift_from_unmodified: 195.1446
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: gcmnm5s2U
+  symbol: gcmnm5s2U
+  name: geranylated 5-carboxymethylaminomethyl-2-thiouridine
+  short_name: gcmnm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 483.2039
+  mass_shift_from_unmodified: 239.1344
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: cnm5U
+  symbol: cnm5U
+  name: 5-cyanomethyl-uridine
+  short_name: cnm5U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 283.0804
+  mass_shift_from_unmodified: 39.0109
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: cnm5s2U
+  symbol: cnm5s2U
+  name: 5-cyanomethyl-2-thiouridine
+  short_name: cnm5s2U
+  target_bases:
+  - U
+  category: biological
+  modified_nucleoside_mass_mono: 299.0576
+  mass_shift_from_unmodified: 54.9881
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: methylation
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: derived_calculation
+    modified_nucleoside_mass: derived_calculation
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: derived_calculation
+    derived_from: cnm5U
+    method: Applied the O->S thio-substitution mass shift (+15.9772 Da), already used in this catalog for s2U/s4U, to the existing PDF-sourced cnm5U mass.
+    curation_status: calculated_not_pdf_verified
+  curation:
+    status: calculated_not_pdf_verified
+    notes: Not directly confirmed against a PDF. modified_nucleoside_mass_mono and mass_shift_from_unmodified were calculated as cnm5U + 15.9772 (the O->S shift already used for s2U/s4U in this catalog). Verify against literature before high-confidence use.
+- id: yW_86
+  symbol: yW-86
+  name: yW-86
+  short_name: yW-86
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 422.155
+  mass_shift_from_unmodified: 139.0633
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.
+- id: yW_72
+  symbol: yW-72
+  name: yW-72
+  short_name: yW-72
+  target_bases:
+  - G
+  category: biological
+  modified_nucleoside_mass_mono: 436.1706
+  mass_shift_from_unmodified: 153.0789
+  mass_basis: nucleoside_delta
+  detectability:
+    ms1: true
+    ms2: true
+  isobaric_group: null
+  chemical_group: biological
+  near_isobaric_group: ''
+  candidate_policy:
+    include_by_mass_search: true
+    include_if_position_rule_exists: true
+    include_if_literature_supported: true
+    include_if_user_specified: true
+  source_priority:
+    mass_shift: user_pdf
+    modified_nucleoside_mass: user_pdf
+    base_mass: mongo_oligo
+    biological_context: literature_or_rule_set
+  sources:
+  - type: user_pdf
+    file: Epson_20260626184346.pdf
+    page: 2
+    source_field: Symbol/Common Name/Mass(mono)/未修飾との差
+    curation_status: manually_checked
+  curation:
+    status: manually_checked
+    notes: User confirmed symbol, Mass(mono), and mass_shift_from_unmodified against PDF on 2026-07-05.

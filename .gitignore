@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+output/
+*.xlsx
+!docs/**/*.xlsx
+.pytest_cache/
+.cache/
+logs/
+*:Zone.Identifier

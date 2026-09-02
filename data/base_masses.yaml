@@ -1,0 +1,26 @@
+mass_type: monoisotopic
+source: "Mongo Oligo compatible placeholder; verify before final quantitative use"
+
+constants:
+  proton: 1.007276466812
+  water: 18.010564684
+  phosphate: 79.966331
+
+rna_residue_masses:
+  A: 329.0525
+  U: 306.0253
+  G: 345.0474
+  C: 305.0413
+
+# Neutral base-loss masses (free nucleobase, BH form) released upon
+# N-glycosidic bond cleavage during CID/HCD fragmentation. Computed from
+# exact monoisotopic elemental composition (see rna_masshunter/masses.py
+# MONOISOTOPIC_ATOMIC_MASSES): Adenine C5H5N5, Guanine C5H5N5O,
+# Cytosine C4H5N3O, Uracil C4H4N2O2. Used as the base value for the
+# base_loss_masses lookup table (rna_masshunter/base_loss_masses.py),
+# which extends these to modified bases.
+nucleobase_loss_masses:
+  A: 135.0545
+  G: 151.0494
+  C: 111.0433
+  U: 112.0273
