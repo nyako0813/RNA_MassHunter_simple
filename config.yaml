@@ -75,9 +75,14 @@ formula_candidate:
   max_candidates_per_match: 10
   include_zero_delta_as_match: true
 
+# 2026-09-02訂正: ピーク探索の主フィルタは max_delta_da（絶対質量幅, Da）。
+# mz_tolerance_ppmは使わない（狭いppm窓では実際の修飾を検出できないため）。
+# min_charge/max_charge/polarityはfragment_mappingを流用する。
+# 詳細: docs/design/RNA_MassHunter_再設計_実装仕様書.md §9.2, §12.5
 mass_comparison:
   enabled: true
-  mz_tolerance_ppm: 10
+  max_delta_da: 300
+  max_matches_per_fragment: 50
 
 reporting:
   excel_output: true

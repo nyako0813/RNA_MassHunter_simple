@@ -100,9 +100,14 @@ DEFAULT_CONFIG: dict[str, dict[str, Any]] = {
         "include_zero_delta_as_match": True,
     },
 
+    # 2026-09-02訂正: ピーク探索は mz_tolerance_ppm ではなく max_delta_da
+    # (絶対質量幅, Da単位) を主探索フィルタとする。狭いppm窓では実際の修飾
+    # (14〜288 Da程度のシフト) を検出できないため。min_charge/max_charge/
+    # polarity は fragment_mapping を流用する（仕様書 §9.2, §12.5参照）。
     "mass_comparison": {
         "enabled": True,
-        "mz_tolerance_ppm": 10,
+        "max_delta_da": 300,
+        "max_matches_per_fragment": 50,
     },
 
     "reporting": {
@@ -180,6 +185,15 @@ def validate_config(config: RunConfig, warnings: list[dict[str, Any]] | None = N
         tolerance = fc.get("mass_tolerance_da")
         if not isinstance(tolerance, (int, float)) or tolerance < 0:
             raise ValueError("formula_candidate.mass_tolerance_da must be a non-negative number")
+
+    mc = config.mass_comparison
+    if mc.get("enabled"):
+        max_delta_da = mc.get("max_delta_da")
+        if not isinstance(max_delta_da, (int, float)) or max_delta_da <= 0:
+            raise ValueError("mass_comparison.max_delta_da must be a positive number")
+        max_matches = mc.get("max_matches_per_fragment")
+        if not isinstance(max_matches, int) or max_matches <= 0:
+            raise ValueError("mass_comparison.max_matches_per_fragment must be a positive integer")
 
 
 def resolve_paths(config: RunConfig, project_root: str | Path) -> RunConfig:
