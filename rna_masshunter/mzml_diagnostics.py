@@ -15,7 +15,14 @@ def _rt_minutes(spectrum: dict[str, Any]) -> float | None:
     rt = scan.get("scan start time")
     if rt is None:
         return None
-    unit = str(scan.get("unitName", "")).lower()
+    # pyteomics (which requires the `psims` package to resolve PSI-MS CV
+    # terms) attaches the declared unit as a `.unit_info` attribute on the
+    # returned `unitfloat` value itself, not as a sibling "unitName" dict
+    # key — `scan.get("unitName")` is always empty in practice, so this used
+    # to silently never convert seconds -> minutes. Check both: the
+    # attribute (the real path with psims installed) and the dict key (kept
+    # as a defensive fallback in case a future parser reports it that way).
+    unit = str(getattr(rt, "unit_info", None) or scan.get("unitName", "")).lower()
     return float(rt) / 60.0 if "second" in unit else float(rt)
 
 

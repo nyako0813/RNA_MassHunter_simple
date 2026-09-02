@@ -3,4 +3,5 @@ numpy
 pandas
 openpyxl
 pyteomics
+psims
 lxml
