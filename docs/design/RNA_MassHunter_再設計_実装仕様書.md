@@ -299,7 +299,7 @@ ms2_annotation:
 | `peak_picking.py` | `extract_ms1_peaks` | mzMLからのMS1ピーク抽出 |
 | `modifications.py` | `load_modifications`, `validate_modifications`, `find_modifications_by_mass_shift` | Modification Candidate列挙 |
 | `mass_shift_ms1_search.py` | `build_sorted_peak_index`, `find_peaks_near_mz`, `SortedPeakIndex` | Fragment×charge×Peakの高速マッチング |
-| `ms1_mapping.py` | `ppm_error`, `_confidence` | Δppm計算・信頼度判定 |
+| `ms1_mapping.py` | `ppm_error` | Δppm計算（表示用の正規化値、§12.5参照）。`_confidence`は2026-09-02の訂正で不使用に変更（マッチの採否を絶対質量幅のみで決める設計に変更したため、ppm近さによる信頼度判定は行わない） |
 | `models.py` | `Fragment`, `Peak`, `Modification`, `MS2SpectrumInfo`, `TheoreticalMS2Ion` | データ構造の基盤（流用、拡張はしない） |
 | `ms2_annotation.py` | `extract_ms2_spectra`, `generate_theoretical_ms2_ions`（`_best_ion_match` はコピー実装、§3.9参照） | MS2参考情報（2026-09-02追記） |
 | `warnings_manager.py` | `add_warning` | エラー/警告記録の統一 |
@@ -512,17 +512,35 @@ def build_mass_comparison_rows(
 ) -> list[MassComparisonRow]:
     """
     fragments × charge(config.fragment_mapping.min_charge..max_charge) × peaks を
-    mass_shift_ms1_search の二分探索で総当たりし、tolerance内のマッチごとに
-    MassComparisonRow を1行生成する。
+    「広い絶対質量幅(Da)」で総当たりし、幅内のマッチごとに MassComparisonRow を1行生成する。
+
+    **2026-09-02訂正**: 初版は `mass_shift_ms1_search.find_peaks_near_mz`（未修飾理論m/zを
+    中心にppm相対窓で探す）をそのまま使う設計だったが、これだと数Da〜288Da規模の実際の修飾質量
+    シフトが窓の外になり検出できないという致命的な不備があった（§12.5参照）。訂正後は
+    `config.mass_comparison.max_delta_da`（Da単位の絶対幅、既定300）を主パラメータとし、
+    ppm許容差はここでは使わない。
 
     手順:
       1. build_sorted_peak_index(peaks) でピーク集合を1回だけソート
-      2. 各fragment・各chargeについて理論m/z (ms1_mapping.theoretical_mz_from_mass) を計算
-      3. find_peaks_near_mz(index, theoretical_mz, config.mass_comparison.mz_tolerance_ppm) でマッチ抽出
+         （`mass_shift_ms1_search.SortedPeakIndex`/`build_sorted_peak_index` は再利用するが、
+          ppm相対探索の `find_peaks_near_mz` そのものは使わない）
+      2. 各fragment・各charge(config.fragment_mapping.min_charge..max_charge)について、
+         中性質量の探索範囲 [unmodified_mass - max_delta_da, unmodified_mass + max_delta_da] を
+         masses.mz_from_neutral_mass で対応するm/z範囲 [mz_low, mz_high] に変換する
+         （charge zが大きいほどm/z範囲は狭くなる: 概ね ΔDa/z 程度の幅になる）
+      3. mass_comparison.py内のプライベートヘルパー `_find_peaks_in_mz_range(index, mz_low, mz_high)`
+         （`bisect.bisect_left`/`bisect_right` を `index.mzs` に対して直接使う、§12.5参照）で
+         範囲内の全ピークを抽出する。ppm許容差はここでは一切使わない。
       4. マッチごとに observed_mass = masses.neutral_mass_from_mz(peak.mz, charge, polarity)
       5. delta_da = observed_mass - fragment.unmodified_mass
       6. delta_ppm = ms1_mapping.ppm_error(observed_mass, fragment.unmodified_mass)
+         （**Δppmの意味の再定義、2026-09-02**: これはもはや「マッチの確からしさ」を示す値では
+          ない。ΔDaを断片サイズに対して正規化した表示用の値に過ぎない。マッチの採否は手順3の
+          絶対質量幅のみで決まる。詳細は§12.5, §15）
       7. formula_candidates = formula_candidate.enumerate_formula_candidates(delta_da, tolerance_da, ...)
+         （`tolerance_da` = `config.formula_candidate.mass_tolerance_da`。ここでの許容差は
+          「このΔDaにどの元素組成がどれだけ精度良く一致するか」という別の意味であり、
+          手順3の探索幅とは別物）
       8. modification_candidates = sorted(
              modifications.find_modifications_by_mass_shift(modifications, delta_da, tolerance_da),
              key=lambda m: abs(m.mass_shift_from_unmodified - delta_da),
@@ -535,10 +553,40 @@ def build_mass_comparison_rows(
           ms2_ion_index, config) を呼び、結果があれば ms2_spectrum_id / ms2_matched_ion_count /
           ms2_matched_ions を埋める。ms2_spectra が None、または該当スペクトルが無い場合は
           既定値（None / 0 / ""）のまま、エラーにはしない。
+      11. (2026-09-02追記) 1つの fragment×charge の組についてマッチしたピーク数が
+          `config.mass_comparison.max_matches_per_fragment` を超える場合、|delta_da| の
+          小さい順（＝より単純な=小さい質量変化から優先表示）に切り詰め、warningsに記録する。
     """
 ```
 
 **ΔDaが±0の場合の扱い**: `formula_candidates` に空文字列（元素差分なし＝一致）を含めてよいかは実装時にconfigで選択可能にする（`mass_comparison.include_zero_delta_as_match: bool`）。既定値は `true`（理論値と完全一致した観測は「差分なし」として明示的に1行残す）。
+
+**`_find_peaks_in_mz_range`（2026-09-02追記、`mass_comparison.py` 内のプライベートヘルパー）**:
+
+```python
+import bisect
+from rna_masshunter.mass_shift_ms1_search import SortedPeakIndex
+
+def _find_peaks_in_mz_range(index: SortedPeakIndex, mz_low: float, mz_high: float) -> list["Peak"]:
+    """index.mzs（m/zでソート済み）に対して bisect で範囲 [mz_low, mz_high] 内の
+    Peak を返す。mass_shift_ms1_search.find_peaks_near_mz と違い、ppm相対窓ではなく
+    呼び出し側が渡す絶対m/z範囲をそのまま使う（§12.5参照）。"""
+    left = bisect.bisect_left(index.mzs, mz_low)
+    right = bisect.bisect_right(index.mzs, mz_high)
+    return index.peaks[left:right]
+```
+
+`mz_low`/`mz_high` の算出（fragment×chargeごと）:
+```python
+from rna_masshunter.masses import mz_from_neutral_mass
+
+mass_low = fragment.unmodified_mass - config.mass_comparison["max_delta_da"]
+mass_high = fragment.unmodified_mass + config.mass_comparison["max_delta_da"]
+# 中性質量が大きいほどm/zも大きい（同じ極性・charge内では単調）ため、
+# 質量の下限・上限がそのままm/zの下限・上限に対応する
+mz_low = mz_from_neutral_mass(mass_low, charge, polarity)
+mz_high = mz_from_neutral_mass(mass_high, charge, polarity)
+```
 
 ### 8.3 `rna_masshunter/observed_mass.py`
 
@@ -675,18 +723,20 @@ formula_candidate:
 
 `element_limits` の初期値は暫定値であり、実装時に `modifications.yaml` の既知修飾の元素組成分布（例えば最大の修飾がどの程度の原子数を要するか）を確認したうえで最終決定する（メモ§16の指示どおり）。`DEFAULT_CONFIG` への追加は既存の `modification_search` / `unknown_modification_search` セクションと同じ形式（`enabled`, `mz_tolerance_ppm` 等の慣例）に揃える。
 
-### 9.2 新規セクション: `mass_comparison`
+### 9.2 新規セクション: `mass_comparison`（2026-09-02訂正、下記「重要な訂正」参照）
 
 ```yaml
 mass_comparison:
   enabled: true
-  mz_tolerance_ppm: 10          # 既存 fragment_mapping.mz_tolerance_ppm と同じ既定値を踏襲
-  min_charge: 1                 # 既存 fragment_mapping.min_charge を踏襲（重複を避けるため参照のみでも可、実装時に決定）
-  max_charge: 8
-  polarity: "auto"
+  max_delta_da: 300             # 探索の主パラメータ（訂正後）。§8.2, §12.5参照
+  max_matches_per_fragment: 50  # 1 fragment×chargeあたりの最大マッチ数（|ΔDa|昇順で切り詰め）
 ```
 
-`fragment_mapping` セクションと値が重複するため、実装時に「`mass_comparison` は独自セクションを持たず `fragment_mapping` の該当フィールドを流用する」か「明示的に別セクションとして持つか」を選択する（**推奨: 既存 `fragment_mapping` セクションをそのまま流用し、`mass_comparison` セクションは `enabled` と `mz_tolerance_ppm` のみの最小構成にする**。重複設定によるユーザーの混乱を避けるため）。
+`min_charge`/`max_charge`/`polarity` は既存 `fragment_mapping` セクションをそのまま流用する（重複を避けるため `mass_comparison` 側には持たない）。**`mz_tolerance_ppm` はこのセクションからは削除した**（理由は次項の訂正を参照）。
+
+**重要な訂正（2026-09-02、ユーザー指摘により判明した設計不備の修正）**: 初版の §8.2 疑似コードは「`find_peaks_near_mz(index, theoretical_mz, config.mass_comparison.mz_tolerance_ppm)` で理論(未修飾)m/zの狭いppm窓内のピークのみを探す」としていたが、これは**誤り**だった。既知修飾の質量シフトは数Da〜288Da程度に及ぶ（実際に `data/modifications.yaml` を集計すると最大は galQ/manQ の288.12 Da）。未修飾理論質量から±10ppm程度の窓では、そもそも修飾の乗った断片のピークが窓の外になり検出されない。これでは「ΔDaを計算してFormula/Modification Candidateを探す」という本ツールの主目的が成立しない。
+
+正しい探索方式は「**広い絶対質量幅（Da単位）での探索を主とし、ppm許容差は探索の絞り込みには使わない**」。詳細な訂正版アルゴリズムは §8.2・§12.5 を参照。この訂正に伴い、`mass_comparison` セクションから `mz_tolerance_ppm` を削除し、`max_delta_da`（探索の主パラメータ）と `max_matches_per_fragment`（結果の上限、ΔDa絶対値の小さい順に切り詰め）を新設した。
 
 ### 9.3 `cca_processing` セクションの拡張
 
@@ -764,7 +814,7 @@ modifications:
 - Δppm: `ms1_mapping.ppm_error(observed, theoretical)` = `(observed - theoretical) / theoretical * 1e6`。
 - 内部計算精度: Python `float`（倍精度、約15〜17桁）をそのまま維持し、途中で丸めない。
 - Excel表示精度: mass列は小数点以下3桁（≈0.001 Da）、ΔDa列は小数点以下5桁（Formula Candidateのppmオーダーの一致確認に耐える精度、例 `+0.00003 Da` 表記のため）、Δppm列は小数点以下1〜2桁を基本とする（`number_format` をopenpyxl側で設定）。
-- 既定の質量許容差: `±0.01 Da`（`formula_candidate.mass_tolerance_da` / `mass_comparison.mz_tolerance_ppm` として設定可能）。
+- 既定の質量許容差: `±0.01 Da`（`formula_candidate.mass_tolerance_da` として設定可能。Modification Candidate検索でも同じ値を共用する、§13）。これはFormula/Modification Candidateの「一致度判定」用の許容差であり、ピークをそもそも候補として拾うかどうか（探索段階）は `mass_comparison.max_delta_da` という別のDa単位の絶対幅パラメータで決まる（2026-09-02訂正、§12.5参照）。
 
 ---
 
@@ -827,6 +877,31 @@ def enumerate_formula_candidates(mass_difference, tolerance_da, *, max_total_ato
 
 `formula_candidate.py` は `modifications.py` を一切importしない。`mass_comparison.py` 側で両者を並行して呼び出し、`MassComparisonRow` の別々のフィールド（`recommended_formula`/`formula_candidates` と `known_modification`/`modification_candidates`）に格納する。**Excel上でも列を隣接させるが混在させない**（§15, §16）。
 
+### 12.5 ピーク探索方式の訂正: なぜ「広い絶対質量幅」が必要か（2026-09-02追記）
+
+**問題**: 初版の `mass_comparison.py` 設計（§8.2）は、各fragment×chargeについて未修飾理論m/zを中心に `config.fragment_mapping.mz_tolerance_ppm`（既定10ppm）の**狭い相対窓**でピークを探す設計だった。これは既存の `map_fragments_to_ms1_peaks`（未修飾断片の同定が目的）や `mass_shift_ms1_search.find_peaks_near_mz`（特定の1つの仮説質量に対する高精度マッチング）の使い方をそのまま踏襲したものだが、**「質量差ΔDaから修飾候補を探す」という本ツールの主目的とは噛み合わない**。10ppmは1000 Daの断片でも±0.01 Da程度の幅にしかならず、これでは修飾が乗っていない断片しか見つからない。
+
+**実データによる裏付け**: `data/modifications.yaml`（118件）を実際に集計すると、`mass_shift_from_unmodified` は次の分布だった。
+
+| | 値 |
+|---|---|
+| 最小 | 0.984 Da（I, イノシン） |
+| 最大 | 288.1209 Da（galQ / manQ, ガラクトシル/マンノシル-キューオシン） |
+| 代表的な中〜大きい例 | wybutosine系 225〜257 Da、2'-O-ribosyl系 212 Da、m1A/m2A/m6A等の単純メチル化 14.0156 Da |
+
+一方、`formula_candidate` の既定 `element_limits`（C:3, H:7, N:3, O:4, P:1, S:1, Se:1、合計7原子）で正方向に説明できる最大質量を実際に計算すると **291.906 Da** だった。これは実データの最大値（288.12 Da）とほぼ一致しており、**element_limitsの既定値が実際の修飾質量分布とほぼ整合している**ことが確認できた（意図した設計ではなく §9.1 の暫定値だったが、結果的に妥当な範囲になっていた）。
+
+**訂正後の方針（原則、§33-4/5と整合）**: ピーク探索の主パラメータを `config.mass_comparison.max_delta_da`（既定 **300 Da**、上記2つの数値に安全マージンを載せた値）とし、fragment×chargeごとに中性質量で `[unmodified_mass - max_delta_da, unmodified_mass + max_delta_da]` の範囲を対応するm/z範囲に変換して**絶対幅で**探索する。ppm許容差（`mz_tolerance_ppm`）は、この段階では一切使わない。
+
+**ppm許容差の役割の再整理**: 「ppmでの精度」という概念自体は無意味になったわけではなく、**役割が変わった**。
+- `formula_candidate.mass_tolerance_da`（既定0.01 Da）: 見つかったΔDaに対し、どの元素組成が「精度良く一致するか」を判定する許容差。
+- `modifications` 検索の `tolerance_da`（同じ値を共用）: 見つかったΔDaに対し、どの既知修飾が「精度良く一致するか」を判定する許容差。
+- **ピークをそもそも候補として拾うかどうか（探索段階）には、もはやppm/Da許容差を使わない** — `max_delta_da` の範囲内であれば、どんなΔDaのピークも候補として拾い、その後のFormula/Modification Candidate探索に委ねる。これは原則2（自動同定を目的にしない）・原則7（候補が複数あることを前提とする）とも整合する: 「本当に説明可能かどうか」の判断はFormula/Modification Candidateの一致度とツールを見る人間に委ねる。
+
+**探索幅の妥当性についての注意**: `max_delta_da=300` は主要な単一修飾をほぼ全てカバーするが、**1つの断片に複数の修飾が重なるケース**（例えばRNase T1の短い断片に複数の修飾塩基が含まれる場合）では合計質量シフトがこれを超える可能性がある。実データで探索漏れが疑われる場合は、この値を大きくするか、`element_limits`/`max_total_atoms`（Formula Candidate側）とあわせて見直すこと（未確定事項リストにも記載）。
+
+**計算量への影響**: 絶対幅探索は依然として `bisect` によるO(log n + k)の二分探索（kはヒット数）であり、探索方式を変えても計算量オーダーは変わらない。ただし窓が広がる分、fragment×chargeあたりのヒット数kは増える可能性があるため、§9.2で新設した `max_matches_per_fragment`（既定50、|ΔDa|昇順で切り詰め）で暴走を防ぐ。
+
 ---
 
 ## 13. 修飾候補検索
@@ -875,7 +950,7 @@ def build_modification_candidates(delta_da: float, modifications: list[Modificat
 | Observed Mass | float | `masses.neutral_mass_from_mz(...)` |
 | Theoretical Mass | float | `Fragment.unmodified_mass` |
 | ΔDa | float | `observed_mass - theoretical_mass` |
-| Δppm | float | `ms1_mapping.ppm_error(...)` |
+| Δppm | float | `ms1_mapping.ppm_error(...)`。ΔDaを断片サイズに対して正規化した表示用の値（2026-09-02訂正: マッチの採否とは無関係、§12.5参照） |
 | Recommended Formula | str | `formula_candidate.get_recommended_formula(...).formula` |
 | Formula Candidates | str | `; ` 区切り文字列（§12.3） |
 | Known Modification | str | 最有力 `Modification` の表示名 |
@@ -1033,6 +1108,8 @@ def test_no_candidates_within_tolerance_returns_empty_list():
 - 小規模フィクスチャ（3〜5個の合成 `Fragment` / `Peak` / `Modification`）を用意し、`build_mass_comparison_rows()` の出力行数・ΔDa/Δppm計算値・Recommended列の一致度順序を検証。
 - Formula CandidateとModification Candidateが互いに独立して計算され、片方が0件でももう片方は影響を受けないことを検証（原則3）。
 - （2026-09-02追記）`ms2_spectra`/`ms2_ion_index` を渡さない場合、`ms2_*` 列が常に既定値（None/0/""）になり、Recommended Formula/Known Modificationの値がMS2の有無で変化しないことを検証。
+- （2026-09-02追記・§12.5対応）**広い質量窓の探索を検証する必須テスト**: 合成フラグメント（理論中性質量 `M`）に対し、`M + 14.0156`（m1A相当の+14 Da修飾）だけずれた `observed_mz` を持つ合成ピークを1つだけ用意し、`mass_comparison.max_delta_da=300` の既定設定で `build_mass_comparison_rows()` を呼び出す。このピークが結果行に**含まれる**こと（`delta_da` が約 `+14.0156`、`modification_candidates` に `m1A` が含まれる）をアサートする。さらに同じフィクスチャに対して意図的に狭い `mz_tolerance_ppm` 相当の窓（例: 対応する仮パラメータを持たせた比較用の呼び出し、または`max_delta_da=0.01`のような極端に狭い値）を渡すケースも用意し、その場合はこのピークが**除外される**ことを確認することで、「狭い窓では実際の修飾を見逃す」という訂正前の不具合が再発していないことを回帰テストとして固定する。
+- （2026-09-02追記）`max_matches_per_fragment` の切り詰め: 1つのfragment×chargeに対して閾値を超える数の合成ピークを用意し、出力行数が `max_matches_per_fragment` 以下に切り詰められ、かつ `abs(delta_da)` 昇順で上位が残ることを検証。
 
 ### `test_ms2_support.py`（2026-09-02追記）
 
@@ -1130,7 +1207,8 @@ def test_ms2_disabled_short_circuits(synthetic_fragments, synthetic_ms2_spectra,
 
 ## 未確定事項・要確認リスト（実装着手前にユーザーへ確認推奨）
 
-- §9.2: `mass_comparison` セクションを独立させるか、`fragment_mapping` を流用するか
+- （2026-09-02解決）§9.2: `mass_comparison` セクションは独立させ、`min_charge`/`max_charge`/`polarity` のみ `fragment_mapping` を流用する方針で確定。あわせて、ピーク探索方式そのものが「`mz_tolerance_ppm` による狭い窓」では実際の修飾（14〜288 Da程度のシフト）を原理的に検出できないという設計上の不具合をユーザーが指摘し、「広い絶対質量幅（`mass_comparison.max_delta_da`、既定300 Da）で探索し、`mz_tolerance_ppm`/`formula_candidate.mass_tolerance_da` は一致度・表示用の副次指標に格下げする」方式に修正した。詳細は §8.2, §9.2, §12.5 を参照。
+- （2026-09-02追記・未解決）`mass_comparison.max_delta_da=300` は単一修飾ならほぼ全てカバーするが、1断片に複数修飾が重なるケースでは合計シフトがこれを超える可能性がある（§12.5参照）。実データ検証（§21）で探索漏れが疑われた場合は、この値の引き上げを検討すること。実装着手前の確定は不要とし、まずはこの既定値で実装を進め、実データ検証（§21）の結果次第で見直す運用とする。
 - §15/16.2: 1つのPeakが複数chargeでマッチした場合の `04_Observed_Mass` の行展開方法
 - §9.4: 出力Excelのファイル名・出力先の命名規則
 - §12.2: `element_limits` の初期値（既存 `modifications.yaml` の分布を見て決定するとメモ§16に明記あり、実装フェーズ0で要確認）
