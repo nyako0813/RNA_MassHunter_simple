@@ -169,6 +169,7 @@ SHEET_DESCRIPTIONS = {
     "05_Mass_Intensity": "Same as 04_Observed_Mass with Intensity as an explicit column.",
     "06_Mass_Comparison": "Fragment x charge x Peak matches: mass differences plus independent Formula/Modification Candidate columns.",
     "07_Modifications": "Known RNA modification database (data/modifications.yaml) used for Modification Candidate search.",
+    "08_Visualization": "Scatter chart: Charge (x) vs Observed Neutral Mass (y), sourced from 04_Observed_Mass.",
 }
 
 
@@ -282,6 +283,61 @@ def _input_frame(config: RunConfig, warnings: list[dict[str, Any]]) -> pd.DataFr
     return pd.DataFrame(rows, columns=["Parameter", "Value"])
 
 
+def _add_visualization_sheet(
+    writer: pd.ExcelWriter,
+    observed_mass_frame: pd.DataFrame,
+    config: RunConfig,
+    warnings: list[dict[str, Any]],
+) -> None:
+    """仕様書 §17: 08_Visualization に Charge(x) x Observed Neutral Mass(y)
+    の散布図を1枚配置する。04_Observed_Mass シートのセルを直接参照するので
+    (openpyxlの`Reference`は値のコピーではなくセル参照)、Excel上でデータ
+    が更新されればチャートも追随する。チャート生成が失敗しても例外を
+    握りつぶし、レポート全体の出力は継続する（§17, §18）。"""
+    sheet = writer.book.create_sheet("08_Visualization")
+    sheet["A1"] = "← Back to Index"
+    sheet["A1"].hyperlink = _sheet_link("01_Index", "A1")
+    sheet["A1"].style = "Hyperlink"
+
+    viz_config = config.visualization or {}
+    if not viz_config.get("enabled", True):
+        sheet["A3"] = "Visualization is disabled (config.visualization.enabled = false)."
+        return
+    if observed_mass_frame.empty:
+        sheet["A3"] = "No observed peaks to plot."
+        return
+
+    try:
+        from openpyxl.chart import Reference, ScatterChart, Series
+
+        source_sheet = writer.book["04_Observed_Mass"]
+        columns = list(observed_mass_frame.columns)
+        charge_col = columns.index("Charge") + 1
+        mass_col = columns.index("Observed Mass") + 1
+        data_first_row = DATA_START_ROW + 1  # header at DATA_START_ROW, data starts the row after
+        data_last_row = DATA_START_ROW + len(observed_mass_frame)
+
+        chart = ScatterChart()
+        chart.title = "Observed Neutral Mass by Charge"
+        chart.x_axis.title = "Charge"
+        chart.y_axis.title = "Observed Neutral Mass (Da)"
+        chart.style = 2
+
+        x_values = Reference(source_sheet, min_col=charge_col, min_row=data_first_row, max_row=data_last_row)
+        y_values = Reference(source_sheet, min_col=mass_col, min_row=data_first_row, max_row=data_last_row)
+        series = Series(y_values, x_values, title="Observed peaks")
+        series.marker.symbol = "circle"
+        series.graphicalProperties.line.noFill = True
+        chart.series.append(series)
+
+        sheet.add_chart(chart, "A5")
+    except Exception as exc:  # noqa: BLE001 - chart generation must never abort the whole report
+        from rna_masshunter.warnings_manager import add_warning
+
+        add_warning(warnings, "WARNING", "excel_report", "08_Visualization chart generation failed; report was written without it.", str(exc))
+        sheet["A3"] = "Chart generation failed; see Warnings in 02_Input."
+
+
 def _apply_number_formats(worksheet: Any, frame: pd.DataFrame, formats: dict[str, str], header_row: int = 3) -> None:
     if frame.empty:
         return
@@ -304,9 +360,9 @@ def write_simple_mass_hunter_report(
     modifications: list[Modification],
     warnings: list[dict[str, Any]] | None = None,
 ) -> Path:
-    """仕様書 §16: 01_Index〜07_Modifications を出力する（08_Visualization
-    はPhase 6で追加）。既存の _add_index_and_backlinks/_autosize_and_freeze
-    のIndex/ハイパーリンク/書式の流儀をそのまま踏襲する（§16.3）。"""
+    """仕様書 §16: 01_Index〜08_Visualization を出力する。既存の
+    _add_index_and_backlinks/_autosize_and_freeze のIndex/ハイパーリンク/
+    書式の流儀をそのまま踏襲する（§16.3）。"""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     warnings = warnings if warnings is not None else []
@@ -331,13 +387,15 @@ def write_simple_mass_hunter_report(
     # spirit: prefer a readable blank/JSON string over a crash).
     sheets = {name: frame.map(_excel_safe_cell) if not frame.empty else frame for name, frame in sheets.items()}
 
-    index_rows = [{"Sheet": name, "Description": SHEET_DESCRIPTIONS.get(name, ""), "Notes": "Data starts at A3."} for name in sheets]
+    all_sheet_names = list(sheets) + ["08_Visualization"]
+    index_rows = [{"Sheet": name, "Description": SHEET_DESCRIPTIONS.get(name, ""), "Notes": "Data starts at A3."} for name in all_sheet_names]
 
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
         pd.DataFrame(index_rows, columns=["Sheet", "Description", "Notes"]).to_excel(writer, sheet_name="01_Index", index=False)
         for sheet_name, frame in sheets.items():
             frame.to_excel(writer, sheet_name=sheet_name, index=False, startrow=2)
-        _add_index_and_backlinks(writer, list(sheets), index_sheet_name="01_Index")
+        _add_visualization_sheet(writer, sheets["04_Observed_Mass"], config, warnings)
+        _add_index_and_backlinks(writer, all_sheet_names, index_sheet_name="01_Index")
 
         # 仕様書 §16.4: mass系列は"0.000"、ΔDa系列は符号付き"+0.00000;-0.00000"、Δppmは"0.0"。
         _apply_number_formats(writer.sheets["03_Theoretical"], sheets["03_Theoretical"], {"Theoretical Mass": "0.000"})

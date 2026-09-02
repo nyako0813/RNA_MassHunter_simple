@@ -116,6 +116,13 @@ DEFAULT_CONFIG: dict[str, dict[str, Any]] = {
         "max_excel_rows_per_sheet": 100000,
         "truncate_large_sheets": True,
     },
+
+    # 08_Visualization scatter chart (Charge x Observed Neutral Mass, §17).
+    # A dedicated section rather than overloading mass_comparison, since it
+    # is purely about report presentation, not the matching logic itself.
+    "visualization": {
+        "enabled": True,
+    },
 }
 
 

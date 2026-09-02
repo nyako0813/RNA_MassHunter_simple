@@ -89,3 +89,6 @@ reporting:
   output_filename: "RNA_MassHunter_simple_report.xlsx"
   max_excel_rows_per_sheet: 100000
   truncate_large_sheets: true
+
+visualization:
+  enabled: true
