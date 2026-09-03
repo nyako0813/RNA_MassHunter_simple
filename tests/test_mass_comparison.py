@@ -210,8 +210,12 @@ def test_peak_beyond_max_delta_da_is_excluded(synthetic_fragments):
 
 def test_max_matches_per_fragment_truncates_to_closest_delta(synthetic_fragments):
     """1つのfragment×chargeに閾値を超える数のピークがある場合、
-    max_matches_per_fragment件に切り詰められ、|ΔDa|昇順で近い順に
-    残ることを確認する。"""
+    max_matches_per_fragment件に切り詰められる。ここで使う5つのΔDa値は
+    （既定のelement_limitsの探索幅では）いずれも何らかのFormula候補を
+    持つため、候補有無の優先順位は全行で同点になり、同順位内の
+    |ΔDa|昇順という従来と変わらない挙動がそのまま観測できる。候補の
+    「有無」で優先順位が変わるケースは
+    test_truncation_prioritizes_rows_with_a_candidate を参照。"""
     fragment = synthetic_fragments[0]
     charge = 2
     shifts = [1.0, 5.0, 10.0, 20.0, 30.0]  # 5 candidates, all within max_delta_da=50
@@ -226,3 +230,28 @@ def test_max_matches_per_fragment_truncates_to_closest_delta(synthetic_fragments
     assert len(rows) == 3
     kept_deltas = sorted(row.delta_da for row in rows)
     assert kept_deltas == pytest.approx([1.0, 5.0, 10.0], abs=1e-3)
+
+
+def test_truncation_prioritizes_rows_with_a_candidate(synthetic_fragments):
+    """2026-09-03変更: 切り詰めは「候補が1件以上ある行を優先→同順位内は
+    |ΔDa|昇順」。|ΔDa|がずっと小さくても候補が無い行より、候補がある行
+    （ここではO1が明確に一致する+15.9949Da）が優先して残ることを確認する。"""
+    fragment = synthetic_fragments[0]
+    charge = 2
+    peaks = [
+        # No Formula/Modification candidate within tolerance (0.01 Da) —
+        # 0.5 Da isn't close to any few-atom C/H/N/O/P/S/Se combination, and
+        # is far enough from 0 that the trivial "0" (no-difference) formula
+        # doesn't match either.
+        Peak(mz=mz_from_neutral_mass(fragment.unmodified_mass + 0.5, charge, "negative"), intensity=100.0),
+        # A clean O1 match (+15.9949 Da) — has a candidate, despite a much
+        # larger |ΔDa| than the peak above.
+        Peak(mz=mz_from_neutral_mass(fragment.unmodified_mass + 15.9949, charge, "negative"), intensity=100.0),
+    ]
+    config = _config(mass_comparison={"enabled": True, "max_delta_da": 50, "max_matches_per_fragment": 1})
+
+    rows = build_mass_comparison_rows(synthetic_fragments, peaks, [], config)
+
+    assert len(rows) == 1
+    assert rows[0].recommended_formula == "O1"
+    assert rows[0].delta_da == pytest.approx(15.9949, abs=1e-3)

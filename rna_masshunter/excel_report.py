@@ -37,7 +37,7 @@ from typing import Any
 import pandas as pd
 from openpyxl.utils import get_column_letter
 
-from rna_masshunter.mass_comparison import MassComparisonRow
+from rna_masshunter.mass_comparison import MassComparisonRow, has_any_candidate
 from rna_masshunter.models import Fragment, Modification, Peak, RunConfig
 from rna_masshunter.observed_mass import assign_peak_ids
 
@@ -169,7 +169,7 @@ SHEET_DESCRIPTIONS = {
     "05_Mass_Intensity": "Same as 04_Observed_Mass with Intensity as an explicit column.",
     "06_Mass_Comparison": "Fragment x charge x Peak matches: mass differences plus independent Formula/Modification Candidate columns.",
     "07_Modifications": "Known RNA modification database (data/modifications.yaml) used for Modification Candidate search.",
-    "08_Visualization": "Scatter chart: Charge (x) vs Observed Neutral Mass (y), sourced from 04_Observed_Mass.",
+    "08_Visualization": "Scatter chart: Charge (x) vs ΔDa (y), sourced from 06_Mass_Comparison and colored by whether a Formula/Modification candidate was found.",
 }
 
 
@@ -301,17 +301,32 @@ def _input_frame(config: RunConfig, warnings: list[dict[str, Any]]) -> pd.DataFr
     return pd.DataFrame(rows, columns=["Parameter", "Value"])
 
 
+_VIZ_HELPER_COL = 20  # column T — far enough right to stay clear of the chart anchored at A5
+
+
 def _add_visualization_sheet(
     writer: pd.ExcelWriter,
-    observed_mass_frame: pd.DataFrame,
+    mass_comparison_rows: list[MassComparisonRow],
     config: RunConfig,
     warnings: list[dict[str, Any]],
 ) -> None:
-    """仕様書 §17: 08_Visualization に Charge(x) x Observed Neutral Mass(y)
-    の散布図を1枚配置する。04_Observed_Mass シートのセルを直接参照するので
-    (openpyxlの`Reference`は値のコピーではなくセル参照)、Excel上でデータ
-    が更新されればチャートも追随する。チャート生成が失敗しても例外を
-    握りつぶし、レポート全体の出力は継続する（§17, §18）。"""
+    """仕様書 §17（2026-09-03改訂）: 08_Visualization に Charge(x) x ΔDa(y)
+    の散布図を1枚配置する。データソースは04_Observed_Massではなく
+    06_Mass_Comparison（各行がFormula/Modification候補を持つかどうかで
+    色分けし、有力な候補が付いた質量差がchargeごとにどう分布しているかを
+    一目で見られるようにする）。
+
+    候補有無での色分けは、openpyxlのScatterChartが1系列内で点ごとに色を
+    変える機能を持たないため、2系列（候補あり/候補なし）に分けて描画する
+    必要がある。06シート本体の行順（fragment→charge順）を変えずに済む
+    よう、行を並べ替えるのではなく、このシートの遠い列（T列以降）に
+    候補あり/なし別のCharge・ΔDaを転記した小さな補助表を用意し、
+    そちらをチャートのデータソースにする（値はopenpyxl経由でセルに直接
+    書き込むだけで、06シートへのセル参照ではない——候補有無は集計値で
+    あり単純なセル参照では表現できないため）。
+
+    チャート生成が失敗しても例外を握りつぶし、レポート全体の出力は継続
+    する（§17, §18）。"""
     sheet = writer.book.create_sheet("08_Visualization")
     sheet["A1"] = "← Back to Index"
     sheet["A1"].hyperlink = _sheet_link("01_Index", "A1")
@@ -321,32 +336,50 @@ def _add_visualization_sheet(
     if not viz_config.get("enabled", True):
         sheet["A3"] = "Visualization is disabled (config.visualization.enabled = false)."
         return
-    if observed_mass_frame.empty:
-        sheet["A3"] = "No observed peaks to plot."
+    if not mass_comparison_rows:
+        sheet["A3"] = "No Mass Comparison rows to plot."
         return
 
     try:
         from openpyxl.chart import Reference, ScatterChart, Series
+        from openpyxl.chart.marker import Marker
+        from openpyxl.chart.shapes import GraphicalProperties
 
-        source_sheet = writer.book["04_Observed_Mass"]
-        columns = list(observed_mass_frame.columns)
-        charge_col = columns.index("Charge") + 1
-        mass_col = columns.index("Observed Mass") + 1
-        data_first_row = DATA_START_ROW + 1  # header at DATA_START_ROW, data starts the row after
-        data_last_row = DATA_START_ROW + len(observed_mass_frame)
+        with_candidate = [row for row in mass_comparison_rows if has_any_candidate(row)]
+        without_candidate = [row for row in mass_comparison_rows if not has_any_candidate(row)]
+
+        header_row = 1
+        col = _VIZ_HELPER_COL
+        sheet.cell(row=header_row, column=col, value="Charge (has candidate)")
+        sheet.cell(row=header_row, column=col + 1, value="ΔDa (has candidate)")
+        sheet.cell(row=header_row, column=col + 2, value="Charge (no candidate)")
+        sheet.cell(row=header_row, column=col + 3, value="ΔDa (no candidate)")
+        for offset, row in enumerate(with_candidate, start=header_row + 1):
+            sheet.cell(row=offset, column=col, value=row.charge)
+            sheet.cell(row=offset, column=col + 1, value=row.delta_da)
+        for offset, row in enumerate(without_candidate, start=header_row + 1):
+            sheet.cell(row=offset, column=col + 2, value=row.charge)
+            sheet.cell(row=offset, column=col + 3, value=row.delta_da)
 
         chart = ScatterChart()
-        chart.title = "Observed Neutral Mass by Charge"
+        chart.title = "ΔDa by Charge (colored by candidate presence)"
         chart.x_axis.title = "Charge"
-        chart.y_axis.title = "Observed Neutral Mass (Da)"
+        chart.y_axis.title = "ΔDa (Da)"
         chart.style = 2
 
-        x_values = Reference(source_sheet, min_col=charge_col, min_row=data_first_row, max_row=data_last_row)
-        y_values = Reference(source_sheet, min_col=mass_col, min_row=data_first_row, max_row=data_last_row)
-        series = Series(y_values, x_values, title="Observed peaks")
-        series.marker.symbol = "circle"
-        series.graphicalProperties.line.noFill = True
-        chart.series.append(series)
+        def _series(mz_col: int, first_row: int, last_row: int, title: str, color: str) -> Series:
+            x_values = Reference(sheet, min_col=col + mz_col, min_row=first_row, max_row=last_row)
+            y_values = Reference(sheet, min_col=col + mz_col + 1, min_row=first_row, max_row=last_row)
+            series = Series(y_values, x_values, title=title)
+            series.marker = Marker(symbol="circle")
+            series.marker.graphicalProperties = GraphicalProperties(solidFill=color)
+            series.graphicalProperties.line.noFill = True
+            return series
+
+        if with_candidate:
+            chart.series.append(_series(0, header_row + 1, header_row + len(with_candidate), "Has candidate", "2E75B6"))
+        if without_candidate:
+            chart.series.append(_series(2, header_row + 1, header_row + len(without_candidate), "No candidate", "BFBFBF"))
 
         sheet.add_chart(chart, "A5")
     except Exception as exc:  # noqa: BLE001 - chart generation must never abort the whole report
@@ -412,7 +445,7 @@ def write_simple_mass_hunter_report(
         pd.DataFrame(index_rows, columns=["Sheet", "Description", "Notes"]).to_excel(writer, sheet_name="01_Index", index=False)
         for sheet_name, frame in sheets.items():
             frame.to_excel(writer, sheet_name=sheet_name, index=False, startrow=2)
-        _add_visualization_sheet(writer, sheets["04_Observed_Mass"], config, warnings)
+        _add_visualization_sheet(writer, mass_comparison_rows, config, warnings)
         _add_index_and_backlinks(writer, all_sheet_names, index_sheet_name="01_Index")
 
         # 仕様書 §16.4: mass系列は"0.000"、ΔDa系列は符号付き"+0.00000;-0.00000"、Δppmは"0.0"。

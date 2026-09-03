@@ -70,6 +70,16 @@ class MassComparisonRow:
     warnings: list[str] = field(default_factory=list)
 
 
+def has_any_candidate(row: MassComparisonRow) -> bool:
+    """True if `row` has a Formula Candidate and/or a Modification
+    Candidate (independently — either counts). `recommended_formula == "0"`
+    (an exact/near-exact ΔDa≈0 match) still counts as informative here,
+    distinct from finding literally nothing within tolerance. Used both for
+    truncation priority (2026-09-03 change) and to color-code
+    08_Visualization (仕様書 §17 revision)."""
+    return row.recommended_formula is not None or row.known_modification is not None
+
+
 def _modification_display_name(modification: Modification) -> str:
     raw = modification.raw or {}
     return str(raw.get("name") or modification.symbol or modification.id)
@@ -146,8 +156,13 @@ def build_mass_comparison_rows(
        を独立に呼び出す
     5. (ms2_spectra/ms2_ion_index が渡され、かつ config.ms2_annotation.enabled
        の場合のみ) ms2_support.find_ms2_support で参考情報を追加
-    6. マッチ数が `max_matches_per_fragment` を超える場合は |ΔDa| 昇順で
-       上位のみ残す
+    6. マッチ数が `max_matches_per_fragment` を超える場合、切り詰め優先順位は
+       (2026-09-03変更) 「Formula/Modification候補が1件以上ある行を優先
+       → 同順位内は |ΔDa| 昇順」。理由: 探索窓(max_delta_da)が広いため、
+       候補の有無を見ずに |ΔDa| だけで切り詰めると、質量的には近いだけで
+       候補が1つも無い行が枠を占有し、統合(§14B/§14C)で空いた枠が同様の
+       低品質候補で埋まってしまう問題があった。MS2はこの優先順位に一切
+       関与しない(原則3、MS2は参考情報に留める)。
     """
     mc_config = config.mass_comparison or {}
     if not mc_config.get("enabled", True):
@@ -198,12 +213,13 @@ def build_mass_comparison_rows(
             mz_low, mz_high = min(mz_bound_a, mz_bound_b), max(mz_bound_a, mz_bound_b)
 
             matched_peaks = _find_peaks_in_mz_range(sorted_index, mz_low, mz_high)
-            if max_matches_per_fragment is not None and len(matched_peaks) > max_matches_per_fragment:
-                matched_peaks = sorted(
-                    matched_peaks,
-                    key=lambda p: abs(neutral_mass_from_mz(p.mz, charge, polarity) - fragment.unmodified_mass),
-                )[:max_matches_per_fragment]
 
+            # Build every candidate row for this fragment x charge *before*
+            # truncating, since truncation priority now depends on whether a
+            # row has a Formula/Modification candidate — that can only be
+            # known after running both searches (2026-09-03 change; see the
+            # docstring above and mass_comparison.py's module docstring).
+            fragment_charge_rows: list[MassComparisonRow] = []
             for peak in matched_peaks:
                 observed_mass = neutral_mass_from_mz(peak.mz, charge, polarity)
                 delta_da = calculate_delta_mass(observed_mass, fragment.unmodified_mass)
@@ -231,7 +247,7 @@ def build_mass_comparison_rows(
                 known_modification = _modification_display_name(modification_matches[0]) if modification_matches else None
                 modification_candidates_str = _format_modification_candidates(delta_da, modification_matches)
 
-                row = MassComparisonRow(
+                fragment_charge_rows.append(MassComparisonRow(
                     peak_id=peak_id_by_object.get(id(peak), ""),
                     fragment_id=fragment.fragment_id,
                     sequence=fragment.sequence,
@@ -250,17 +266,22 @@ def build_mass_comparison_rows(
                     scan_id=peak.scan_id,
                     scan_count=getattr(peak, "scan_count", 1),
                     rt_range=getattr(peak, "rt_range", None),
-                )
+                ))
 
-                if find_ms2_support is not None:
+            if max_matches_per_fragment is not None and len(fragment_charge_rows) > max_matches_per_fragment:
+                fragment_charge_rows.sort(key=lambda r: (0 if has_any_candidate(r) else 1, abs(r.delta_da)))
+                fragment_charge_rows = fragment_charge_rows[:max_matches_per_fragment]
+
+            if find_ms2_support is not None:
+                for row in fragment_charge_rows:
                     support = find_ms2_support(
-                        fragment.fragment_id, charge, peak.mz, ms2_spectra, ms2_ion_index, config,
+                        fragment.fragment_id, charge, row.observed_mz, ms2_spectra, ms2_ion_index, config,
                     )
                     if support is not None:
                         row.ms2_spectrum_id = support.spectrum_id
                         row.ms2_matched_ion_count = support.matched_ion_count
                         row.ms2_matched_ions = support.matched_ions
 
-                rows.append(row)
+            rows.extend(fragment_charge_rows)
 
     return rows
