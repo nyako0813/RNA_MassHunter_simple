@@ -23,8 +23,15 @@ from rna_masshunter.models import Fragment, Modification, Peak, RunConfig
 from rna_masshunter.modifications import load_modifications, validate_modifications
 from rna_masshunter.ms2_extraction import extract_ms2_spectra
 from rna_masshunter.ms2_support import build_ms2_ion_index
+from rna_masshunter.nucleoside_comparison import NucleosideComparisonRow, build_nucleoside_comparison_rows
+from rna_masshunter.nucleoside_targets import NucleosideTarget, build_nucleoside_target_universe
 from rna_masshunter.peak_picking import extract_ms1_peaks, merge_adjacent_profile_points, merge_peaks_across_scans
 from rna_masshunter.warnings_manager import add_warning
+
+# §24 (Phase 10): selecting this enzyme switches the whole pipeline into P1
+# complete-digestion mode (known-nucleoside mass matching) instead of the
+# oligomer fragment / ΔDa-exploration flow the rest of this module runs.
+_P1_COMPLETE_DIGESTION_ENZYME = "Nuclease_P1"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -51,6 +58,14 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
         （excel_report.py はPhase 5で追加されるため、ここでは遅延import —
         呼ばれるのは実際にExcel出力が有効な場合のみ）
     12. テスト・CLI双方から使えるよう dict で結果を返す
+
+    §24（Phase 10）: `config.digestion.enzyme` が "Nuclease_P1" の場合は
+    P1完全分解モードに分岐する。RNase A/T1等のオリゴマー断片フロー
+    （配列・CCA処理・digest_sequence、いずれも位置依存のロジック）は
+    完全にスキップし、代わりに既知ヌクレオシド質量ユニバース
+    （nucleoside_targets.py）とMS1ピークを直接照合する
+    （nucleoside_comparison.py、狭いppm許容差）。MS2参考情報・Formula
+    Candidate探索はP1モードでは行わない（§24のスコープ外）。
     """
     root = Path(project_root) if project_root is not None else REPO_ROOT
     warnings: list[dict[str, Any]] = []
@@ -63,11 +78,18 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
     validate_modifications(modifications, warnings)
     base_masses = load_base_masses(root / "data" / "base_masses.yaml", warnings)
 
+    is_p1_mode = str(config.digestion.get("enzyme") or "").strip() == _P1_COMPLETE_DIGESTION_ENZYME
+    nucleoside_targets: list[NucleosideTarget] = []
+
     raw_sequence = str(config.sequence.get("sequence") or "")
     fragments: list[Fragment] = []
     theoretical_mass: float | None = None
     cca_result: CCAProcessingResult | None = None
-    if not raw_sequence:
+    if is_p1_mode:
+        nucleoside_targets = build_nucleoside_target_universe(modifications, warnings)
+        if raw_sequence:
+            add_warning(warnings, "INFO", "simple_pipeline", "digestion.enzyme is Nuclease_P1; sequence/CCA/fragment generation was skipped (P1 complete-digestion mode matches peaks directly against known nucleoside masses, §24).")
+    elif not raw_sequence:
         add_warning(warnings, "WARNING", "simple_pipeline", "sequence.sequence is empty; theoretical mass and fragments were not generated.")
     else:
         cca_result = process_cca_tail(
@@ -111,34 +133,49 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
 
     ms2_spectra: list[Any] = []
     ms2_ion_index: dict[str, list[Any]] = {}
-    if mzml_path and fragments and bool(config.ms2_annotation.get("enabled", True)):
-        ms2_spectra = extract_ms2_spectra(mzml_path, config.ms2_annotation, warnings)
-        if ms2_spectra:
-            ms2_ion_index = build_ms2_ion_index(fragments, config, base_masses, warnings)
+    rows: list[MassComparisonRow] = []
+    nucleoside_rows: list[NucleosideComparisonRow] = []
+    if is_p1_mode:
+        # §24: known-nucleoside matching only — no MS2, no Formula Candidate.
+        nucleoside_rows = build_nucleoside_comparison_rows(peaks, nucleoside_targets, config, base_masses, warnings=warnings)
+    else:
+        if mzml_path and fragments and bool(config.ms2_annotation.get("enabled", True)):
+            ms2_spectra = extract_ms2_spectra(mzml_path, config.ms2_annotation, warnings)
+            if ms2_spectra:
+                ms2_ion_index = build_ms2_ion_index(fragments, config, base_masses, warnings)
 
-    rows: list[MassComparisonRow] = build_mass_comparison_rows(
-        fragments, peaks, modifications, config, warnings=warnings,
-        ms2_spectra=ms2_spectra or None, ms2_ion_index=ms2_ion_index or None,
-    )
+        rows = build_mass_comparison_rows(
+            fragments, peaks, modifications, config, warnings=warnings,
+            ms2_spectra=ms2_spectra or None, ms2_ion_index=ms2_ion_index or None,
+        )
 
     output_path: Path | None = None
     if bool(config.reporting.get("excel_output", True)):
-        from rna_masshunter.excel_report import write_simple_mass_hunter_report
-
         output_dir = Path(str(config.project.get("output_dir") or "output"))
         output_dir.mkdir(parents=True, exist_ok=True)
         output_filename = str(config.reporting.get("output_filename") or "RNA_MassHunter_simple_report.xlsx")
         output_path = output_dir / output_filename
-        write_simple_mass_hunter_report(output_path, config, fragments, peaks, rows, modifications, warnings=warnings)
+
+        if is_p1_mode:
+            from rna_masshunter.excel_report import write_nucleoside_mass_hunter_report
+
+            write_nucleoside_mass_hunter_report(output_path, config, nucleoside_targets, peaks, nucleoside_rows, modifications, base_masses, warnings=warnings)
+        else:
+            from rna_masshunter.excel_report import write_simple_mass_hunter_report
+
+            write_simple_mass_hunter_report(output_path, config, fragments, peaks, rows, modifications, warnings=warnings)
 
     return {
         "config": config,
         "warnings": warnings,
+        "mode": "p1_nucleoside" if is_p1_mode else "oligomer",
         "cca_result": cca_result,
         "theoretical_mass": theoretical_mass,
         "fragments": fragments,
         "peaks": peaks,
         "ms2_spectra": ms2_spectra,
         "mass_comparison_rows": rows,
+        "nucleoside_targets": nucleoside_targets,
+        "nucleoside_comparison_rows": nucleoside_rows,
         "output_path": str(output_path) if output_path else None,
     }

@@ -123,6 +123,12 @@ DEFAULT_CONFIG: dict[str, dict[str, Any]] = {
         "enabled": True,
         "max_delta_da": 300,
         "max_matches_per_fragment": 50,
+        # §24 (Phase 10): P1 complete-digestion mode (digestion.enzyme ==
+        # "Nuclease_P1") matches peaks directly against a small, fixed set
+        # of known nucleoside masses, so it uses a narrow ppm tolerance
+        # (like fragment_mapping's, not the wide max_delta_da search) —
+        # there's no unknown ΔDa to explore, just known masses to confirm.
+        "nucleoside_mz_tolerance_ppm": 10,
     },
 
     "reporting": {

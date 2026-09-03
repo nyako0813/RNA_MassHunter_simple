@@ -6,7 +6,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 
 ## 実装状況
 
-設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9まで実装・検証済み（`pytest` 67件通過、実データでのエンドツーエンド動作確認済み）。
+設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 84件通過、実データでのエンドツーエンド動作確認済み）。
 
 `nyako0813/RNA_MassHunter`（大規模な既存リポジトリ）から移植した機能:
 
@@ -37,6 +37,17 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 - `rna_masshunter/excel_report.py`: 01_Index〜08_Visualizationのシート出力（元リポジトリの同名だが無関係な `excel_report.py` とは別物）。
   - 04_Observed_Mass/05_Mass_Intensity/06_Mass_Comparisonに「Scan Count」「RT Range」列（§14Cの統合情報）。
   - 08_Visualizationは06_Mass_Comparisonを情報源とするCharge×ΔDaの散布図で、Formula/Modification候補の有無で2系列に色分けする。
+
+### P1完全分解モード（§24, Phase 10）
+
+`config.digestion.enzyme` に `"Nuclease_P1"` を指定すると、パイプライン全体が別モードに切り替わる。Nuclease P1はRNAを個々のリボヌクレオシド（5'-一リン酸）まで完全に加水分解するため、オリゴマー断片×ΔDa探索ではなく、既知ヌクレオシド質量との直接照合を行う。
+
+- `rna_masshunter/nucleoside_targets.py`: 標準4塩基（`ElementalComposition`から算出、文献値と照合するテスト付き）+ `data/modifications.yaml`収載の修飾ヌクレオシド（`modified_nucleoside_mass_mono`フィールドを使用、118件全てに値あり）から成る既知ヌクレオシド質量ユニバースを構築する。
+- `rna_masshunter/nucleoside_comparison.py`: 既存の`mass_shift_ms1_search.find_peaks_near_mz`（狭いppm許容差）でMS1ピークをこのユニバースと直接照合する。`mass_comparison.py`の広い`max_delta_da`探索とは異なり、既知の個別質量への確認照合のため。
+- リン酸の有無は既存の`config.alkaline_phosphatase.enabled`をそのまま流用（P1モード専用の新規configキーは増やしていない）。有効なら遊離ヌクレオシド質量、無効なら5'-一リン酸化分を加えた質量で照合する。
+- Formula Candidateによる未知修飾ヌクレオシドの推定は行わない（既知ヌクレオシドとの質量照合のみが§24のスコープ）。MS2参考情報もP1モードでは付加しない。
+- P1モード時は`sequence.sequence`・CCA処理・断片生成（いずれも配列上の位置に依存するロジック）を完全にスキップする。
+- Excel出力は既存の01_Index〜08_Visualizationの枠組み（Index/ハイパーリンク/切り詰め/書式）をそのまま流用しつつ、03/06シートをNucleosideTargetベースの内容（`03_Nucleoside_Targets`, `06_Nucleoside_Comparison`）に差し替える（04/05/07は共通）。
 
 ## 実データでの検証結果（Phase 8）
 

@@ -39,6 +39,8 @@ from openpyxl.utils import get_column_letter
 
 from rna_masshunter.mass_comparison import MassComparisonRow, has_any_candidate
 from rna_masshunter.models import Fragment, Modification, Peak, RunConfig
+from rna_masshunter.nucleoside_comparison import NucleosideComparisonRow
+from rna_masshunter.nucleoside_targets import NucleosideTarget, theoretical_mass_for_target
 from rna_masshunter.observed_mass import assign_peak_ids
 
 # --- vendored helpers (see module docstring) ---------------------------------
@@ -170,6 +172,12 @@ SHEET_DESCRIPTIONS = {
     "06_Mass_Comparison": "Fragment x charge x Peak matches: mass differences plus independent Formula/Modification Candidate columns.",
     "07_Modifications": "Known RNA modification database (data/modifications.yaml) used for Modification Candidate search.",
     "08_Visualization": "Scatter chart: Charge (x) vs ΔDa (y), sourced from 06_Mass_Comparison and colored by whether a Formula/Modification candidate was found.",
+    # §24 (Phase 10) P1 complete-digestion mode: 03/06 are repurposed (see
+    # write_nucleoside_mass_hunter_report), 04/05/07 are unchanged (peaks
+    # and the modification database don't depend on fragment vs nucleoside
+    # mode), 08 sources from 06_Nucleoside_Comparison instead.
+    "03_Nucleoside_Targets": "Known nucleoside mass universe (4 standard bases + data/modifications.yaml) used for P1 complete-digestion matching, under the current alkaline_phosphatase.enabled setting.",
+    "06_Nucleoside_Comparison": "Peak x known-nucleoside-target matches (narrow ppm tolerance) for Nuclease P1 complete-digestion mode.",
 }
 
 
@@ -204,13 +212,15 @@ def _format_rt_range(scan_count: int, rt_range: tuple[float, float] | None) -> s
     return f"{rt_range[0]:.3f}-{rt_range[1]:.3f}"
 
 
-def _observed_rows(peaks: list[Peak], mass_comparison_rows: list[MassComparisonRow]) -> list[dict[str, Any]]:
+def _observed_rows(peaks: list[Peak], mass_comparison_rows: list[MassComparisonRow] | list[NucleosideComparisonRow]) -> list[dict[str, Any]]:
     """仕様書 §15/§16.2 の推奨に従い、1ピークにつき複数chargeでマッチした
     場合はcharge単位で行を分ける。マッチが1件も無かったピークも
     (charge/observed massは空欄のまま) 1行として残し、抽出済みMS1ピーク
     全体が04/05シートから欠落しないようにする。Scan Count/RT Range列は
     peak_picking.merge_peaks_across_scans() が統合したピークについてのみ
-    埋まる（仕様書 §14C）。"""
+    埋まる（仕様書 §14C）。`mass_comparison_rows`はMassComparisonRow /
+    NucleosideComparisonRowのどちらでもよい（peak_id/charge/observed_mass
+    属性のみ参照するため、§24のP1モードでもそのまま再利用できる）。"""
     ids_by_index = assign_peak_ids(peaks)
     charges_by_peak_id: dict[str, set[int]] = {}
     observed_mass_by_peak_charge: dict[tuple[str, int], float] = {}
@@ -287,6 +297,43 @@ def _modifications_frame(modifications: list[Modification]) -> pd.DataFrame:
     ]
     columns = ["ID", "Symbol", "Name", "Target Bases", "Category", "Mass Shift (Da)", "Chemical Group", "Near-Isobaric Group", "Detectability", "Curation Status"]
     return pd.DataFrame(rows, columns=columns)
+
+
+def _target_universe_frame(targets: list[NucleosideTarget], dephosphorylated: bool, base_masses: dict[str, Any]) -> pd.DataFrame:
+    """§24 (Phase 10) 03_Nucleoside_Targets: 標準4塩基+修飾ヌクレオシドの
+    既知質量ユニバースを、現在の脱リン酸化設定下での理論質量とともに示す。"""
+    rows = [
+        {
+            "Label": target.label, "Name": target.name, "Category": target.category,
+            "Theoretical Mass": theoretical_mass_for_target(target, dephosphorylated, base_masses),
+        }
+        for target in targets
+    ]
+    return pd.DataFrame(rows, columns=["Label", "Name", "Category", "Theoretical Mass"])
+
+
+_NUCLEOSIDE_COMPARISON_COLUMNS = [
+    "Peak ID", "Target Label", "Target Name", "Category", "Charge", "Intensity",
+    "Observed Mass", "Theoretical Mass", "ΔDa", "Δppm", "Scan Count", "RT Range",
+]
+
+
+def _nucleoside_comparison_frame(rows: list[NucleosideComparisonRow]) -> pd.DataFrame:
+    """§24 (Phase 10) 06_Nucleoside_Comparison: 06_Mass_Comparisonと同じ
+    Index/ハイパーリンク/切り詰め/書式の枠組みを流用するが、列はFragment
+    ではなくNucleosideTargetベース（Recommended Formula等のFormula
+    Candidate関連列は無い——P1モードは既知質量照合のみがスコープ、§24）。"""
+    data = [
+        {
+            "Peak ID": row.peak_id, "Target Label": row.target_label, "Target Name": row.target_name,
+            "Category": row.target_category, "Charge": row.charge, "Intensity": row.intensity,
+            "Observed Mass": row.observed_mass, "Theoretical Mass": row.theoretical_mass,
+            "ΔDa": row.delta_da, "Δppm": row.delta_ppm,
+            "Scan Count": row.scan_count, "RT Range": _format_rt_range(row.scan_count, row.rt_range),
+        }
+        for row in rows
+    ]
+    return pd.DataFrame(data, columns=_NUCLEOSIDE_COMPARISON_COLUMNS)
 
 
 def _input_frame(config: RunConfig, warnings: list[dict[str, Any]]) -> pd.DataFrame:
@@ -389,6 +436,77 @@ def _add_visualization_sheet(
         sheet["A3"] = "Chart generation failed; see Warnings in 02_Input."
 
 
+def _add_nucleoside_visualization_sheet(
+    writer: pd.ExcelWriter,
+    nucleoside_comparison_rows: list[NucleosideComparisonRow],
+    config: RunConfig,
+    warnings: list[dict[str, Any]],
+) -> None:
+    """§24 (Phase 10) P1モード版の08_Visualization。
+    _add_visualization_sheet と同じ構造だが、候補有無ではなく
+    target_category（standard/modified）で2系列に色分けする。"""
+    sheet = writer.book.create_sheet("08_Visualization")
+    sheet["A1"] = "← Back to Index"
+    sheet["A1"].hyperlink = _sheet_link("01_Index", "A1")
+    sheet["A1"].style = "Hyperlink"
+
+    viz_config = config.visualization or {}
+    if not viz_config.get("enabled", True):
+        sheet["A3"] = "Visualization is disabled (config.visualization.enabled = false)."
+        return
+    if not nucleoside_comparison_rows:
+        sheet["A3"] = "No Nucleoside Comparison rows to plot."
+        return
+
+    try:
+        from openpyxl.chart import Reference, ScatterChart, Series
+        from openpyxl.chart.marker import Marker
+        from openpyxl.chart.shapes import GraphicalProperties
+
+        standard_rows = [row for row in nucleoside_comparison_rows if row.target_category == "standard"]
+        modified_rows = [row for row in nucleoside_comparison_rows if row.target_category != "standard"]
+
+        header_row = 1
+        col = _VIZ_HELPER_COL
+        sheet.cell(row=header_row, column=col, value="Charge (standard)")
+        sheet.cell(row=header_row, column=col + 1, value="ΔDa (standard)")
+        sheet.cell(row=header_row, column=col + 2, value="Charge (modified)")
+        sheet.cell(row=header_row, column=col + 3, value="ΔDa (modified)")
+        for offset, row in enumerate(standard_rows, start=header_row + 1):
+            sheet.cell(row=offset, column=col, value=row.charge)
+            sheet.cell(row=offset, column=col + 1, value=row.delta_da)
+        for offset, row in enumerate(modified_rows, start=header_row + 1):
+            sheet.cell(row=offset, column=col + 2, value=row.charge)
+            sheet.cell(row=offset, column=col + 3, value=row.delta_da)
+
+        chart = ScatterChart()
+        chart.title = "ΔDa by Charge (colored by standard vs modified nucleoside)"
+        chart.x_axis.title = "Charge"
+        chart.y_axis.title = "ΔDa (Da)"
+        chart.style = 2
+
+        def _series(mz_col: int, first_row: int, last_row: int, title: str, color: str) -> Series:
+            x_values = Reference(sheet, min_col=col + mz_col, min_row=first_row, max_row=last_row)
+            y_values = Reference(sheet, min_col=col + mz_col + 1, min_row=first_row, max_row=last_row)
+            series = Series(y_values, x_values, title=title)
+            series.marker = Marker(symbol="circle")
+            series.marker.graphicalProperties = GraphicalProperties(solidFill=color)
+            series.graphicalProperties.line.noFill = True
+            return series
+
+        if standard_rows:
+            chart.series.append(_series(0, header_row + 1, header_row + len(standard_rows), "Standard base", "2E75B6"))
+        if modified_rows:
+            chart.series.append(_series(2, header_row + 1, header_row + len(modified_rows), "Modified nucleoside", "C0504D"))
+
+        sheet.add_chart(chart, "A5")
+    except Exception as exc:  # noqa: BLE001 - chart generation must never abort the whole report
+        from rna_masshunter.warnings_manager import add_warning
+
+        add_warning(warnings, "WARNING", "excel_report", "08_Visualization chart generation failed; report was written without it.", str(exc))
+        sheet["A3"] = "Chart generation failed; see Warnings in 02_Input."
+
+
 def _apply_number_formats(worksheet: Any, frame: pd.DataFrame, formats: dict[str, str], header_row: int = 3) -> None:
     if frame.empty:
         return
@@ -453,6 +571,67 @@ def write_simple_mass_hunter_report(
         _apply_number_formats(writer.sheets["04_Observed_Mass"], sheets["04_Observed_Mass"], {"m/z": "0.000", "Observed Mass": "0.000"})
         _apply_number_formats(writer.sheets["05_Mass_Intensity"], sheets["05_Mass_Intensity"], {"m/z": "0.000", "Observed Mass": "0.000"})
         _apply_number_formats(writer.sheets["06_Mass_Comparison"], sheets["06_Mass_Comparison"], {
+            "Observed Mass": "0.000", "Theoretical Mass": "0.000",
+            "ΔDa": "+0.00000;-0.00000", "Δppm": "0.0",
+        })
+
+        _autosize_and_freeze(writer, index_sheet_name="01_Index")
+
+    return output_path
+
+
+def write_nucleoside_mass_hunter_report(
+    output_path: str | Path,
+    config: RunConfig,
+    targets: list[NucleosideTarget],
+    peaks: list[Peak],
+    nucleoside_comparison_rows: list[NucleosideComparisonRow],
+    modifications: list[Modification],
+    base_masses: dict[str, Any],
+    warnings: list[dict[str, Any]] | None = None,
+) -> Path:
+    """§24 (Phase 10): Nuclease P1完全分解モード用のExcel出力。
+    write_simple_mass_hunter_report と同じ01_Index〜08_Visualizationの
+    枠組み（Index/ハイパーリンク/切り詰め/書式まわりの共通ヘルパー）を
+    そのまま流用するが、03/06シートはFragmentベースではなくNucleosideTarget
+    ベースの内容に差し替える（04/05/07は共通——ピークの生データと
+    修飾データベースはどちらのモードでも同じ）。"""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    warnings = warnings if warnings is not None else []
+
+    reporting = config.reporting or {}
+    max_rows = int(reporting.get("max_excel_rows_per_sheet", 100000) or 100000)
+    truncate_large_sheets = bool(reporting.get("truncate_large_sheets", True))
+    dephosphorylated = bool((config.alkaline_phosphatase or {}).get("enabled", False))
+
+    observed_rows = _observed_rows(peaks, nucleoside_comparison_rows)
+
+    sheets: dict[str, pd.DataFrame] = {
+        "02_Input": _input_frame(config, warnings),
+        "03_Nucleoside_Targets": _target_universe_frame(targets, dephosphorylated, base_masses),
+        "04_Observed_Mass": _observed_mass_frame(observed_rows),
+        "05_Mass_Intensity": _mass_intensity_frame(observed_rows),
+        "06_Nucleoside_Comparison": _nucleoside_comparison_frame(nucleoside_comparison_rows),
+        "07_Modifications": _modifications_frame(modifications),
+    }
+    sheets = {name: _truncate_frame_if_needed(name, frame, max_rows, truncate_large_sheets, warnings) for name, frame in sheets.items()}
+    sheets = {name: frame.map(_excel_safe_cell) if not frame.empty else frame for name, frame in sheets.items()}
+
+    all_sheet_names = list(sheets) + ["08_Visualization"]
+    index_rows = [{"Sheet": name, "Description": SHEET_DESCRIPTIONS.get(name, ""), "Notes": "Data starts at A3."} for name in all_sheet_names]
+
+    with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+        pd.DataFrame(index_rows, columns=["Sheet", "Description", "Notes"]).to_excel(writer, sheet_name="01_Index", index=False)
+        for sheet_name, frame in sheets.items():
+            frame.to_excel(writer, sheet_name=sheet_name, index=False, startrow=2)
+        _add_nucleoside_visualization_sheet(writer, nucleoside_comparison_rows, config, warnings)
+        _add_index_and_backlinks(writer, all_sheet_names, index_sheet_name="01_Index")
+
+        _apply_number_formats(writer.sheets["03_Nucleoside_Targets"], sheets["03_Nucleoside_Targets"], {"Theoretical Mass": "0.000"})
+        _apply_number_formats(writer.sheets["04_Observed_Mass"], sheets["04_Observed_Mass"], {"m/z": "0.000", "Observed Mass": "0.000"})
+        _apply_number_formats(writer.sheets["05_Mass_Intensity"], sheets["05_Mass_Intensity"], {"m/z": "0.000", "Observed Mass": "0.000"})
+        _apply_number_formats(writer.sheets["06_Nucleoside_Comparison"], sheets["06_Nucleoside_Comparison"], {
             "Observed Mass": "0.000", "Theoretical Mass": "0.000",
             "ΔDa": "+0.00000;-0.00000", "Δppm": "0.0",
         })

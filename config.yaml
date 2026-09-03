@@ -93,6 +93,10 @@ mass_comparison:
   enabled: true
   max_delta_da: 300
   max_matches_per_fragment: 50
+  # §24 (Phase 10): used only in P1 complete-digestion mode
+  # (digestion.enzyme: "Nuclease_P1"), a narrow ppm match against known
+  # nucleoside masses instead of the wide max_delta_da search.
+  nucleoside_mz_tolerance_ppm: 10
 
 reporting:
   excel_output: true

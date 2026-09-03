@@ -375,3 +375,103 @@ def test_pipeline_merge_across_scans_collapses_elution_profile_into_one_row(tmp_
     data_row = next(r for r in ws6.iter_rows(min_row=4, values_only=True) if r[1] == fragment.fragment_id and r[3] == 2)
     assert data_row[scan_count_col] == 5
     assert data_row[rt_range_col] == "3.000-3.080"
+
+
+# --- §24 (Phase 10): Nuclease P1 complete-digestion mode --------------------
+
+def _p1_config_text(mzml_path, output_dir, ap_enabled: bool) -> str:
+    return textwrap.dedent(f"""
+        sequence:
+          name: should_be_ignored_in_p1_mode
+          sequence: {SEQUENCE}
+        instrument:
+          polarity: negative
+        digestion:
+          enzyme: Nuclease_P1
+        alkaline_phosphatase:
+          enabled: {"true" if ap_enabled else "false"}
+        input:
+          mzml_path: {mzml_path}
+        project:
+          output_dir: {output_dir}
+        ms1_peak_extraction:
+          mz_min: 0
+          mz_max: 5000
+          intensity_threshold: 0
+        reporting:
+          excel_output: true
+    """)
+
+
+def test_p1_mode_skips_sequence_cca_and_fragments(tmp_path):
+    config_path = tmp_path / "config_p1_dry.yaml"
+    config_path.write_text(_p1_config_text(mzml_path="", output_dir=tmp_path / "output", ap_enabled=True), encoding="utf-8")
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    assert result["mode"] == "p1_nucleoside"
+    assert result["fragments"] == []
+    assert result["cca_result"] is None
+    assert result["theoretical_mass"] is None
+    assert len(result["nucleoside_targets"]) > 100  # 4 standard + ~118 modified
+    assert any(t.label == "A" and t.category == "standard" for t in result["nucleoside_targets"])
+
+
+def test_p1_mode_matches_standard_and_modified_nucleosides_end_to_end(tmp_path):
+    from rna_masshunter.masses import mz_from_neutral_mass
+    from rna_masshunter.nucleoside_targets import build_nucleoside_target_universe
+    from rna_masshunter.modifications import load_modifications
+
+    modifications = load_modifications(REPO_ROOT / "data" / "modifications.yaml")
+    targets = build_nucleoside_target_universe(modifications)
+    adenosine = next(t for t in targets if t.label == "A")
+    m1a = next(t for t in targets if t.label == "m1A")
+
+    mzml_path = tmp_path / "p1.mzML"
+    _write_mzml(mzml_path, [
+        {"id": "scan=1", "ms_level": 1, "rt": 1.0, "mzs": [mz_from_neutral_mass(adenosine.nucleoside_mass, 1, "negative")], "intensities": [1000.0]},
+        {"id": "scan=2", "ms_level": 1, "rt": 1.5, "mzs": [mz_from_neutral_mass(m1a.nucleoside_mass, 1, "negative")], "intensities": [800.0]},
+    ])
+    config_path = tmp_path / "config_p1.yaml"
+    config_path.write_text(_p1_config_text(mzml_path, tmp_path / "output", ap_enabled=True), encoding="utf-8")
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    rows = result["nucleoside_comparison_rows"]
+    standard_match = next((r for r in rows if r.target_label == "A"), None)
+    modified_match = next((r for r in rows if r.target_label == "m1A"), None)
+    assert standard_match is not None
+    assert standard_match.target_category == "standard"
+    assert standard_match.delta_da == pytest.approx(0.0, abs=1e-6)
+    assert modified_match is not None
+    assert modified_match.target_category == "modified"
+
+    wb = openpyxl.load_workbook(result["output_path"])
+    assert wb.sheetnames == ["01_Index", "02_Input", "03_Nucleoside_Targets", "04_Observed_Mass", "05_Mass_Intensity", "06_Nucleoside_Comparison", "07_Modifications", "08_Visualization"]
+    ws6 = wb["06_Nucleoside_Comparison"]
+    header = [cell.value for cell in ws6[3]]
+    assert header == ["Peak ID", "Target Label", "Target Name", "Category", "Charge", "Intensity", "Observed Mass", "Theoretical Mass", "ΔDa", "Δppm", "Scan Count", "RT Range"]
+
+
+def test_p1_mode_alkaline_phosphatase_disabled_matches_phosphorylated_mass(tmp_path):
+    from rna_masshunter.masses import mz_from_neutral_mass, load_base_masses
+    from rna_masshunter.nucleoside_targets import build_standard_nucleoside_targets
+
+    base_masses = load_base_masses(REPO_ROOT / "data" / "base_masses.yaml")
+    phosphate = float(base_masses["constants"]["phosphate"])
+    adenosine = build_standard_nucleoside_targets()[0]
+    assert adenosine.label == "A"
+
+    mzml_path = tmp_path / "p1_phospho.mzML"
+    _write_mzml(mzml_path, [
+        {"id": "scan=1", "ms_level": 1, "rt": 1.0, "mzs": [mz_from_neutral_mass(adenosine.nucleoside_mass + phosphate, 1, "negative")], "intensities": [1000.0]},
+    ])
+    config_path = tmp_path / "config_p1_phospho.yaml"
+    config_path.write_text(_p1_config_text(mzml_path, tmp_path / "output", ap_enabled=False), encoding="utf-8")
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    match = next((r for r in result["nucleoside_comparison_rows"] if r.target_label == "A"), None)
+    assert match is not None
+    assert match.delta_da == pytest.approx(0.0, abs=1e-6)
+    assert match.theoretical_mass == pytest.approx(adenosine.nucleoside_mass + phosphate, abs=1e-6)
