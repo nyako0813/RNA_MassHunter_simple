@@ -49,6 +49,10 @@ fragment_mapping:
 ms1_peak_extraction:
   rt_min: null
   rt_max: null
+  # §24.5: mz_min: 500 assumes oligomer fragments. If digestion.enzyme is
+  # "Nuclease_P1" (P1 complete-digestion mode), lower this to ~100-150 —
+  # free nucleoside masses run ~230-370 Da (up to ~450 Da phosphorylated),
+  # and simple_pipeline.py logs a WARNING if mz_min stays >= 400 in that mode.
   mz_min: 500
   mz_max: 3000
   intensity_threshold: 1000

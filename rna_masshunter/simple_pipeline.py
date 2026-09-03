@@ -35,6 +35,30 @@ _P1_COMPLETE_DIGESTION_ENZYME = "Nuclease_P1"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+# §24.5: P1 mode targets free nucleosides (~230-370 Da) up to their
+# 5'-monophosphate form (~+80 Da, so up to roughly 450 Da) — a default
+# oligomer-oriented mz_min like 500 would filter out essentially all of
+# them before they ever reach nucleoside_comparison.py. This is just a
+# heuristic trip-wire (not a hard validation error) to catch that
+# misconfiguration early instead of silently returning zero matches.
+_P1_MODE_MZ_MIN_WARNING_THRESHOLD = 400
+
+
+def _warn_if_mz_min_too_high_for_p1_mode(config: RunConfig, warnings: list[dict[str, Any]]) -> None:
+    mz_min = config.ms1_peak_extraction.get("mz_min")
+    try:
+        mz_min_value = float(mz_min) if mz_min is not None else None
+    except (TypeError, ValueError):
+        mz_min_value = None
+    if mz_min_value is not None and mz_min_value >= _P1_MODE_MZ_MIN_WARNING_THRESHOLD:
+        add_warning(
+            warnings, "WARNING", "simple_pipeline",
+            "ms1_peak_extraction.mz_min looks too high for Nuclease_P1 (P1 complete-digestion) mode; "
+            "free nucleoside masses are typically ~230-370 Da (up to ~450 Da phosphorylated), so peaks "
+            "may be filtered out before they can match. Consider lowering mz_min to ~100-150 for P1 mode.",
+            {"mz_min": mz_min_value, "threshold": _P1_MODE_MZ_MIN_WARNING_THRESHOLD},
+        )
+
 
 def run(config_path: str | Path, project_root: str | Path | None = None) -> dict[str, Any]:
     """仕様書 §8.4 の手順:
@@ -89,6 +113,14 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
         nucleoside_targets = build_nucleoside_target_universe(modifications, warnings)
         if raw_sequence:
             add_warning(warnings, "INFO", "simple_pipeline", "digestion.enzyme is Nuclease_P1; sequence/CCA/fragment generation was skipped (P1 complete-digestion mode matches peaks directly against known nucleoside masses, §24).")
+        if bool(config.ms2_annotation.get("enabled", True)):
+            # §24.5: explicit, regardless of the config value — d/w/a/z
+            # fragment ions require an oligomer backbone to cut, which does
+            # not exist once P1 has hydrolyzed everything down to single
+            # nucleosides, so MS2 annotation is not a meaningful concept in
+            # this mode at all (not just "not yet implemented").
+            add_warning(warnings, "INFO", "simple_pipeline", "digestion.enzyme is Nuclease_P1; MS2 annotation was explicitly skipped regardless of ms2_annotation.enabled — d/w/a/z fragment ions don't exist for single nucleosides (§24.5).")
+        _warn_if_mz_min_too_high_for_p1_mode(config, warnings)
     elif not raw_sequence:
         add_warning(warnings, "WARNING", "simple_pipeline", "sequence.sequence is empty; theoretical mass and fragments were not generated.")
     else:

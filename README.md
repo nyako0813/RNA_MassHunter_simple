@@ -45,9 +45,11 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 - `rna_masshunter/nucleoside_targets.py`: 標準4塩基（`ElementalComposition`から算出、文献値と照合するテスト付き）+ `data/modifications.yaml`収載の修飾ヌクレオシド（`modified_nucleoside_mass_mono`フィールドを使用、118件全てに値あり）から成る既知ヌクレオシド質量ユニバースを構築する。
 - `rna_masshunter/nucleoside_comparison.py`: 既存の`mass_shift_ms1_search.find_peaks_near_mz`（狭いppm許容差）でMS1ピークをこのユニバースと直接照合する。`mass_comparison.py`の広い`max_delta_da`探索とは異なり、既知の個別質量への確認照合のため。
 - リン酸の有無は既存の`config.alkaline_phosphatase.enabled`をそのまま流用（P1モード専用の新規configキーは増やしていない）。有効なら遊離ヌクレオシド質量、無効なら5'-一リン酸化分を加えた質量で照合する。
-- Formula Candidateによる未知修飾ヌクレオシドの推定は行わない（既知ヌクレオシドとの質量照合のみが§24のスコープ）。MS2参考情報もP1モードでは付加しない。
+- Formula Candidateによる未知修飾ヌクレオシドの推定は行わない（既知ヌクレオシドとの質量照合のみが§24のスコープ）。MS2参考情報もP1モードでは付加しない——`config.ms2_annotation.enabled`の値に関わらず明示的にスキップする（d/w/a/zイオンは断片化する主鎖があって初めて意味を持つ概念であり、単一ヌクレオシドには成立しないため、§24.5）。
 - P1モード時は`sequence.sequence`・CCA処理・断片生成（いずれも配列上の位置に依存するロジック）を完全にスキップする。
 - Excel出力は既存の01_Index〜08_Visualizationの枠組み（Index/ハイパーリンク/切り詰め/書式）をそのまま流用しつつ、03/06シートをNucleosideTargetベースの内容（`03_Nucleoside_Targets`, `06_Nucleoside_Comparison`）に差し替える（04/05/07は共通）。
+- **`ms1_peak_extraction.mz_min` に注意**（§24.5）: 既定値`500`はオリゴマー断片を想定した値。P1モードで検出対象となる遊離ヌクレオシドは概ね230〜370 Da（リン酸付加でも+80 Da程度）と大幅に軽いため、`mz_min`を100〜150程度まで下げないと検出漏れが起きる。`mz_min`が400以上のままP1モードを実行するとWARNINGが記録される。
+- `modified_nucleoside_mass_mono`が無い`data/modifications.yaml`エントリに備えたフォールバック（§24.2）: target_baseの遊離ヌクレオシド質量 + `mass_shift_from_unmodified`で計算する（target_basesが単一塩基でない場合はスキップし警告する）。現状の118件は全て`modified_nucleoside_mass_mono`を直接持っており（フォールバックは未使用）、フォールバック計算値との差は最大でも約0.05mDa（4桁丸め相当、系統的なズレ無し）であることをテストで確認済み。
 
 ## 実データでの検証結果（Phase 8）
 

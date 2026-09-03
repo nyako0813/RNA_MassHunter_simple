@@ -475,3 +475,67 @@ def test_p1_mode_alkaline_phosphatase_disabled_matches_phosphorylated_mass(tmp_p
     assert match is not None
     assert match.delta_da == pytest.approx(0.0, abs=1e-6)
     assert match.theoretical_mass == pytest.approx(adenosine.nucleoside_mass + phosphate, abs=1e-6)
+
+
+def _p1_config_text_with_mz_min(mz_min: float, output_dir) -> str:
+    return textwrap.dedent(f"""
+        sequence:
+          name: should_be_ignored_in_p1_mode
+          sequence: {SEQUENCE}
+        instrument:
+          polarity: negative
+        digestion:
+          enzyme: Nuclease_P1
+        alkaline_phosphatase:
+          enabled: true
+        ms1_peak_extraction:
+          mz_min: {mz_min}
+        project:
+          output_dir: {output_dir}
+        reporting:
+          excel_output: false
+    """)
+
+
+def test_p1_mode_warns_when_mz_min_too_high(tmp_path):
+    """仕様書 §24.5: P1モードでmz_minが概ね400以上のままだと、遊離
+    ヌクレオシド質量(~230-370 Da)がフィルタで落ちて検出漏れになるため
+    WARNINGを出す。"""
+    config_path = tmp_path / "config_p1_high_mz_min.yaml"
+    config_path.write_text(_p1_config_text_with_mz_min(500, tmp_path / "output"), encoding="utf-8")
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    assert any(
+        w["Source"] == "simple_pipeline" and w["Level"] == "WARNING" and "mz_min" in w["Message"]
+        for w in result["warnings"]
+    )
+
+
+def test_p1_mode_no_mz_min_warning_when_low(tmp_path):
+    config_path = tmp_path / "config_p1_low_mz_min.yaml"
+    config_path.write_text(_p1_config_text_with_mz_min(100, tmp_path / "output"), encoding="utf-8")
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    assert not any(
+        w["Source"] == "simple_pipeline" and "mz_min" in w["Message"]
+        for w in result["warnings"]
+    )
+
+
+def test_p1_mode_logs_explicit_ms2_skip_message(tmp_path):
+    """仕様書 §24.5: ms2_annotation.enabledの値に関わらず、P1モードでは
+    MS2処理を能動的にスキップした旨をログに残す（暗黙的に呼ばれない
+    だけでなく、モードとして明示的に無効化されていることが分かるように
+    する）。"""
+    config_path = tmp_path / "config_p1_ms2.yaml"
+    config_path.write_text(_p1_config_text_with_mz_min(100, tmp_path / "output"), encoding="utf-8")  # ms2_annotation.enabled defaults to true
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    assert result["ms2_spectra"] == []
+    assert any(
+        w["Source"] == "simple_pipeline" and w["Level"] == "INFO" and "MS2" in w["Message"] and "Nuclease_P1" in w["Message"]
+        for w in result["warnings"]
+    )

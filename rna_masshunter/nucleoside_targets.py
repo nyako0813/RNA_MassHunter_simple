@@ -68,28 +68,69 @@ def _modification_display_name(modification: Modification) -> str:
     return str(raw.get("name") or modification.symbol or modification.id)
 
 
+def _fallback_nucleoside_mass(
+    modification: Modification,
+    standard_by_label: dict[str, float],
+) -> float | None:
+    """仕様書 §24.2: `modified_nucleoside_mass_mono` が無い場合のフォール
+    バック — target_baseの遊離ヌクレオシド質量 + mass_shift_from_unmodified
+    で計算する。target_basesが単一塩基でない場合（今のところ
+    modifications.yaml内に例は無いが、防御的に）は曖昧なためNoneを返す
+    （呼び出し側でスキップ・警告する）。"""
+    target_bases = modification.target_bases or []
+    if len(target_bases) != 1:
+        return None
+    base = str(target_bases[0]).upper()
+    base_mass = standard_by_label.get(base)
+    if base_mass is None:
+        return None
+    shift = modification.mass_shift_from_unmodified
+    if shift is None or shift != shift:  # NaN check (float('nan') != float('nan'))
+        return None
+    return base_mass + float(shift)
+
+
 def build_modified_nucleoside_targets(
     modifications: list[Modification],
     warnings: list[dict[str, Any]] | None = None,
+    standard_targets: list[NucleosideTarget] | None = None,
 ) -> list[NucleosideTarget]:
-    """One target per data/modifications.yaml entry, using its
-    `modified_nucleoside_mass_mono` field directly (already the free
-    modified-nucleoside monoisotopic mass — no formula computation needed).
-    Entries missing that field are skipped with a warning rather than
-    guessed at."""
+    """One target per data/modifications.yaml entry.
+
+    Primary source is the `modified_nucleoside_mass_mono` field (already the
+    free modified-nucleoside monoisotopic mass — no formula computation
+    needed). When that field is absent, falls back to `target_base`'s
+    standard nucleoside mass + `mass_shift_from_unmodified` (仕様書 §24.2).
+    As of this writing all 118 real data/modifications.yaml entries carry
+    `modified_nucleoside_mass_mono` directly (verified: the fallback-
+    computed mass agrees with the direct value to within ~0.05 mDa across
+    all of them — consistent with the direct values simply being stored
+    rounded to 4 decimals — so the fallback path is currently unexercised
+    but validated). Entries where *neither* path can produce a mass
+    (missing/non-numeric `modified_nucleoside_mass_mono` AND an ambiguous or
+    unknown target_base) are skipped with a warning rather than guessed at."""
+    standard_by_label = {t.label: t.nucleoside_mass for t in (standard_targets or build_standard_nucleoside_targets())}
+
     targets: list[NucleosideTarget] = []
     for modification in modifications:
         raw = modification.raw or {}
         mass = raw.get("modified_nucleoside_mass_mono")
+        used_fallback = False
+        if mass is not None:
+            try:
+                mass = float(mass)
+            except (TypeError, ValueError):
+                if warnings is not None:
+                    add_warning(warnings, "WARNING", "nucleoside_targets", "modified_nucleoside_mass_mono is not numeric; trying target_base + mass_shift fallback.", modification.id or modification.symbol)
+                mass = None
+        if mass is None:
+            mass = _fallback_nucleoside_mass(modification, standard_by_label)
+            used_fallback = mass is not None
+            if used_fallback and warnings is not None:
+                add_warning(warnings, "INFO", "nucleoside_targets", "modified_nucleoside_mass_mono missing; used target_base + mass_shift_from_unmodified fallback (§24.2).", modification.id or modification.symbol)
         if mass is None:
             if warnings is not None:
-                add_warning(warnings, "INFO", "nucleoside_targets", "Modification has no modified_nucleoside_mass_mono; skipped for P1 mode.", modification.id or modification.symbol)
-            continue
-        try:
-            mass = float(mass)
-        except (TypeError, ValueError):
-            if warnings is not None:
-                add_warning(warnings, "WARNING", "nucleoside_targets", "modified_nucleoside_mass_mono is not numeric; skipped for P1 mode.", modification.id or modification.symbol)
+                add_warning(warnings, "INFO", "nucleoside_targets", "Modification has no modified_nucleoside_mass_mono and no usable fallback (missing/ambiguous target_base or mass_shift); skipped for P1 mode.", modification.id or modification.symbol)
             continue
         targets.append(NucleosideTarget(
             label=str(modification.symbol or modification.id),
@@ -105,7 +146,8 @@ def build_nucleoside_target_universe(
     warnings: list[dict[str, Any]] | None = None,
 ) -> list[NucleosideTarget]:
     """Standard bases + modified nucleosides, in that order."""
-    return build_standard_nucleoside_targets() + build_modified_nucleoside_targets(modifications, warnings)
+    standard = build_standard_nucleoside_targets()
+    return standard + build_modified_nucleoside_targets(modifications, warnings, standard_targets=standard)
 
 
 def theoretical_mass_for_target(

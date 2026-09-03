@@ -45,18 +45,72 @@ def test_build_modified_nucleoside_targets_from_real_modifications_yaml():
     assert by_label["m1A"].category == "modified"
 
 
-def test_missing_modified_nucleoside_mass_mono_is_skipped_with_warning():
+def test_real_modifications_yaml_direct_mass_agrees_with_fallback_within_1mDa():
+    """§24.2 coverage/consistency check (要望に基づく検証):
+    data/modifications.yaml の118件全てが modified_nucleoside_mass_mono を
+    直接持つ（フォールバック計算は現状使われない）ことと、直接値と
+    target_base質量+mass_shift_from_unmodifiedのフォールバック計算値との
+    間に系統的なズレが無い（実測: 最大でも約0.05mDa、4桁丸め由来と考えて
+    矛盾しない）ことを回帰的に確認する。"""
+    from rna_masshunter.modifications import load_modifications
+
+    modifications = load_modifications(REPO_ROOT / "data" / "modifications.yaml")
+    with_direct_mass = [m for m in modifications if (m.raw or {}).get("modified_nucleoside_mass_mono") is not None]
+    assert len(with_direct_mass) == len(modifications) == 118
+
+    standard_by_label = {t.label: t.nucleoside_mass for t in build_standard_nucleoside_targets()}
+    max_abs_diff = 0.0
+    for modification in modifications:
+        direct = float(modification.raw["modified_nucleoside_mass_mono"])
+        base = modification.target_bases[0]
+        fallback = standard_by_label[base] + modification.mass_shift_from_unmodified
+        max_abs_diff = max(max_abs_diff, abs(direct - fallback))
+    assert max_abs_diff < 1e-3  # < 1 mDa; observed max is ~0.05 mDa (4-decimal rounding in the source data)
+
+
+def test_missing_modified_nucleoside_mass_mono_falls_back_to_target_base_plus_shift():
+    """仕様書 §24.2: フィールドが無い場合はtarget_baseの遊離ヌクレオシド
+    質量 + mass_shift_from_unmodifiedで計算する。"""
+    modifications = [
+        Modification(id="nomass", symbol="nm", mass_shift_from_unmodified=14.0156, category="biological", target_bases=["A"], raw={}),
+    ]
+    warnings: list[dict] = []
+    adenosine_mass = build_standard_nucleoside_targets()[0].nucleoside_mass  # A
+
+    targets = build_modified_nucleoside_targets(modifications, warnings)
+
+    assert len(targets) == 1
+    assert targets[0].label == "nm"
+    assert targets[0].nucleoside_mass == pytest.approx(adenosine_mass + 14.0156, abs=1e-9)
+    assert any(w["Source"] == "nucleoside_targets" and w["Level"] == "INFO" and "fallback" in w["Message"].lower() and "nomass" in str(w.get("Context")) for w in warnings)
+
+
+def test_direct_mass_mono_takes_priority_over_fallback():
     modifications = [
         Modification(id="hasmass", symbol="hm", mass_shift_from_unmodified=14.0, category="biological", target_bases=["A"], raw={"modified_nucleoside_mass_mono": 300.0}),
-        Modification(id="nomass", symbol="nm", mass_shift_from_unmodified=14.0, category="biological", target_bases=["A"], raw={}),
+    ]
+
+    targets = build_modified_nucleoside_targets(modifications)
+
+    assert len(targets) == 1
+    assert targets[0].nucleoside_mass == pytest.approx(300.0, abs=1e-9)
+
+
+def test_ambiguous_or_unknown_target_base_with_no_direct_mass_is_skipped_with_warning():
+    modifications = [
+        Modification(id="no_base", symbol="nb", mass_shift_from_unmodified=14.0, category="biological", target_bases=[], raw={}),
+        Modification(id="multi_base", symbol="mb", mass_shift_from_unmodified=14.0, category="biological", target_bases=["A", "C"], raw={}),
+        Modification(id="unknown_base", symbol="ub", mass_shift_from_unmodified=14.0, category="biological", target_bases=["X"], raw={}),
+        Modification(id="no_shift", symbol="ns", mass_shift_from_unmodified=None, category="biological", target_bases=["A"], raw={}),
     ]
     warnings: list[dict] = []
 
     targets = build_modified_nucleoside_targets(modifications, warnings)
 
-    assert len(targets) == 1
-    assert targets[0].label == "hm"
-    assert any(w["Source"] == "nucleoside_targets" and "nomass" in str(w.get("Context")) for w in warnings)
+    assert targets == []
+    skipped_ids = {str(w.get("Context")) for w in warnings if w["Source"] == "nucleoside_targets"}
+    for expected_id in ("no_base", "multi_base", "unknown_base", "no_shift"):
+        assert any(expected_id in s for s in skipped_ids)
 
 
 def test_build_nucleoside_target_universe_combines_standard_and_modified():
