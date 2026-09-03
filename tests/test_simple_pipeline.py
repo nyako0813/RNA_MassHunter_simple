@@ -256,3 +256,122 @@ def test_pipeline_dry_run_without_mzml_completes_with_warnings(tmp_path, config_
     # Excel is still produced (with 04-06 sheets empty) even without mzML.
     assert result["output_path"]
     assert Path(result["output_path"]).exists()
+
+
+def test_pipeline_merge_profile_points_toggle(tmp_path):
+    """仕様書 §14B: config.ms1_peak_extraction.merge_profile_points が
+    true（既定）なら1スキャン内の隣接プロファイル点が統合され、false なら
+    生のまま全点が残ることを、simple_pipeline.run() を通しで確認する。
+    §14Cのmerge_across_scansはscan-rank差0（同一scan）も対象に含むため
+    （境界を跨がない場合の当然の帰結）、ここでは両方を明示的にfalseに
+    しないとmerge_profile_points単体の効果が見えないので、falseケースは
+    両方offにする。"""
+    mzml_path = tmp_path / "profile.mzML"
+    _write_mzml(mzml_path, [
+        {
+            "id": "scan=1", "ms_level": 1, "rt": 2.0,
+            # a 5-point profile-mode "mountain" around one true ion, plus one
+            # well-separated second ion in the same scan.
+            "mzs": [600.00000, 600.00002, 600.00004, 600.00006, 600.00008, 900.0],
+            "intensities": [100.0, 400.0, 900.0, 350.0, 90.0, 700.0],
+        },
+    ])
+
+    def _config_path(merge_enabled: bool) -> Path:
+        text = textwrap.dedent(f"""
+            sequence:
+              name: MergeToggleTest
+              sequence: {SEQUENCE}
+            instrument:
+              polarity: negative
+            input:
+              mzml_path: {mzml_path}
+            project:
+              output_dir: {tmp_path / ('merge_on' if merge_enabled else 'merge_off')}
+            ms1_peak_extraction:
+              mz_min: 0
+              mz_max: 5000
+              intensity_threshold: 0
+              merge_profile_points: {"true" if merge_enabled else "false"}
+              merge_tolerance_ppm: 10
+              merge_across_scans: {"true" if merge_enabled else "false"}
+            ms2_annotation:
+              enabled: false
+            reporting:
+              excel_output: false
+        """)
+        path = tmp_path / f"config_merge_{merge_enabled}.yaml"
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    merged_result = simple_pipeline.run(_config_path(True), project_root=REPO_ROOT)
+    unmerged_result = simple_pipeline.run(_config_path(False), project_root=REPO_ROOT)
+
+    assert len(unmerged_result["peaks"]) == 6
+    assert len(merged_result["peaks"]) == 2
+    merged_intensities = sorted(p.intensity for p in merged_result["peaks"])
+    assert merged_intensities == [700.0, 900.0]
+
+
+def test_pipeline_merge_across_scans_collapses_elution_profile_into_one_row(tmp_path, target_fragment_and_ions):
+    """仕様書 §14C の統合テスト: 実データ（19 Gln2h.mzML）で確認されたのと
+    同じ状況——同一イオンが複数の連続scanにまたがって検出される——を合成
+    mzMLで再現し、06_Mass_Comparisonが1行に統合され、Scan Count/RT Range
+    列にその情報が残ることを確認する。"""
+    fragment, _ions = target_fragment_and_ions
+    unmodified_mz = mz_from_neutral_mass(fragment.unmodified_mass, 2, "negative")
+
+    mzml_path = tmp_path / "elution.mzML"
+    scan_rts = [3.00, 3.02, 3.04, 3.06, 3.08]
+    intensities = [200.0, 600.0, 1000.0, 550.0, 180.0]  # apex mid-elution
+    _write_mzml(mzml_path, [
+        {"id": f"scan={i + 1}", "ms_level": 1, "rt": rt, "mzs": [unmodified_mz], "intensities": [intensity]}
+        for i, (rt, intensity) in enumerate(zip(scan_rts, intensities))
+    ])
+
+    config_text = textwrap.dedent(f"""
+        sequence:
+          name: IntegrationTest
+          sequence: {SEQUENCE}
+        instrument:
+          polarity: negative
+        digestion:
+          enzyme: RNase_T1
+          missed_cleavages: 1
+          min_length: 2
+        input:
+          mzml_path: {mzml_path}
+        project:
+          output_dir: {tmp_path / "output"}
+        ms1_peak_extraction:
+          mz_min: 0
+          mz_max: 5000
+          intensity_threshold: 0
+          merge_max_scan_gap: 2
+        ms2_annotation:
+          enabled: false
+        reporting:
+          excel_output: true
+    """)
+    config_path = tmp_path / "config_elution.yaml"
+    config_path.write_text(config_text, encoding="utf-8")
+
+    result = simple_pipeline.run(config_path, project_root=REPO_ROOT)
+
+    matching_rows = [row for row in result["mass_comparison_rows"] if row.fragment_id == fragment.fragment_id and row.charge == 2]
+    assert len(matching_rows) == 1
+    row = matching_rows[0]
+    assert row.scan_count == 5
+    assert row.rt_range == pytest.approx((3.00, 3.08))
+    assert row.intensity == 1000.0  # the apex scan was kept as representative
+
+    wb = openpyxl.load_workbook(result["output_path"])
+    ws6 = wb["06_Mass_Comparison"]
+    header = [cell.value for cell in ws6[3]]
+    assert "Scan Count" in header
+    assert "RT Range" in header
+    scan_count_col = header.index("Scan Count")
+    rt_range_col = header.index("RT Range")
+    data_row = next(r for r in ws6.iter_rows(min_row=4, values_only=True) if r[1] == fragment.fragment_id and r[3] == 2)
+    assert data_row[scan_count_col] == 5
+    assert data_row[rt_range_col] == "3.000-3.080"

@@ -23,7 +23,7 @@ from rna_masshunter.models import Fragment, Modification, Peak, RunConfig
 from rna_masshunter.modifications import load_modifications, validate_modifications
 from rna_masshunter.ms2_extraction import extract_ms2_spectra
 from rna_masshunter.ms2_support import build_ms2_ion_index
-from rna_masshunter.peak_picking import extract_ms1_peaks
+from rna_masshunter.peak_picking import extract_ms1_peaks, merge_adjacent_profile_points, merge_peaks_across_scans
 from rna_masshunter.warnings_manager import add_warning
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -39,7 +39,11 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
     5/6. 理論質量計算
     7. digestion.digest_sequence() で理論断片生成
     8. peak_picking.extract_ms1_peaks() でMS1ピーク抽出（mzml_path未指定
-       時はスキップし警告のみ記録、§18）
+       時はスキップし警告のみ記録、§18）。
+       config.ms1_peak_extraction.merge_profile_points が真の場合、続けて
+       peak_picking.merge_adjacent_profile_points() でprofile-mode由来の
+       分裂ピーク点を統合する（§14B）。以降の全ステップ（MS2前駆体マッチ、
+       Mass Comparison、Excel出力）はこの統合後のpeaksを一貫して使う。
     9. config.ms2_annotation.enabled かつ mzMLがある場合のみMS2スペクトル
        抽出・理論イオンindex構築
     10. mass_comparison.build_mass_comparison_rows() で行生成
@@ -92,6 +96,18 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
         except Exception as exc:  # noqa: BLE001 - mirrors ms2_extraction's "skip with warning" pattern
             add_warning(warnings, "WARNING", "simple_pipeline", "MS1 peak extraction failed; Mass Comparison will be skipped.", str(exc))
             peaks = []
+        merge_tolerance_ppm = float(config.ms1_peak_extraction.get("merge_tolerance_ppm", 10) or 10)
+        if peaks and bool(config.ms1_peak_extraction.get("merge_profile_points", True)):
+            before = len(peaks)
+            peaks = merge_adjacent_profile_points(peaks, merge_tolerance_ppm)
+            if len(peaks) != before:
+                add_warning(warnings, "INFO", "simple_pipeline", "Merged adjacent profile-mode peak points (§14B).", {"before": before, "after": len(peaks)})
+        if peaks and bool(config.ms1_peak_extraction.get("merge_across_scans", True)):
+            before = len(peaks)
+            max_scan_gap = int(config.ms1_peak_extraction.get("merge_max_scan_gap", 2) or 0)
+            peaks = merge_peaks_across_scans(peaks, merge_tolerance_ppm, max_scan_gap)
+            if len(peaks) != before:
+                add_warning(warnings, "INFO", "simple_pipeline", "Merged the same ion's detections across nearby scans (§14C).", {"before": before, "after": len(peaks), "max_scan_gap": max_scan_gap})
 
     ms2_spectra: list[Any] = []
     ms2_ion_index: dict[str, list[Any]] = {}

@@ -196,11 +196,21 @@ def _theoretical_frame(fragments: list[Fragment]) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["Fragment ID", "Sequence", "Start", "End", "Length", "Enzyme", "Missed Cleavage", "Terminal Form", "Theoretical Mass"])
 
 
+def _format_rt_range(scan_count: int, rt_range: tuple[float, float] | None) -> str:
+    """仕様書 §14C: scan_count<=1（cross-scanマージが起きていない通常の
+    ピーク）なら空欄のまま。既存のRT列と重複する情報を増やさないため。"""
+    if scan_count <= 1 or rt_range is None:
+        return ""
+    return f"{rt_range[0]:.3f}-{rt_range[1]:.3f}"
+
+
 def _observed_rows(peaks: list[Peak], mass_comparison_rows: list[MassComparisonRow]) -> list[dict[str, Any]]:
     """仕様書 §15/§16.2 の推奨に従い、1ピークにつき複数chargeでマッチした
     場合はcharge単位で行を分ける。マッチが1件も無かったピークも
     (charge/observed massは空欄のまま) 1行として残し、抽出済みMS1ピーク
-    全体が04/05シートから欠落しないようにする。"""
+    全体が04/05シートから欠落しないようにする。Scan Count/RT Range列は
+    peak_picking.merge_peaks_across_scans() が統合したピークについてのみ
+    埋まる（仕様書 §14C）。"""
     ids_by_index = assign_peak_ids(peaks)
     charges_by_peak_id: dict[str, set[int]] = {}
     observed_mass_by_peak_charge: dict[tuple[str, int], float] = {}
@@ -211,33 +221,40 @@ def _observed_rows(peaks: list[Peak], mass_comparison_rows: list[MassComparisonR
     rows: list[dict[str, Any]] = []
     for index, peak in enumerate(peaks):
         peak_id = ids_by_index[index]
+        scan_count = getattr(peak, "scan_count", 1)
+        rt_range_str = _format_rt_range(scan_count, getattr(peak, "rt_range", None))
         charges = sorted(charges_by_peak_id.get(peak_id, set()))
         if not charges:
-            rows.append({"Peak ID": peak_id, "m/z": peak.mz, "Charge": None, "Observed Mass": None, "Intensity": peak.intensity, "RT": peak.rt, "Scan ID": peak.scan_id})
+            rows.append({
+                "Peak ID": peak_id, "m/z": peak.mz, "Charge": None, "Observed Mass": None,
+                "Intensity": peak.intensity, "RT": peak.rt, "Scan ID": peak.scan_id,
+                "Scan Count": scan_count, "RT Range": rt_range_str,
+            })
             continue
         for charge in charges:
             rows.append({
                 "Peak ID": peak_id, "m/z": peak.mz, "Charge": charge,
                 "Observed Mass": observed_mass_by_peak_charge.get((peak_id, charge)),
                 "Intensity": peak.intensity, "RT": peak.rt, "Scan ID": peak.scan_id,
+                "Scan Count": scan_count, "RT Range": rt_range_str,
             })
     return rows
 
 
 def _observed_mass_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
-    columns = ["Peak ID", "m/z", "Charge", "Observed Mass", "RT", "Scan ID"]
+    columns = ["Peak ID", "m/z", "Charge", "Observed Mass", "RT", "Scan ID", "Scan Count", "RT Range"]
     return pd.DataFrame(rows, columns=columns)
 
 
 def _mass_intensity_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
-    columns = ["Peak ID", "m/z", "Charge", "Observed Mass", "Intensity", "RT", "Scan ID"]
+    columns = ["Peak ID", "m/z", "Charge", "Observed Mass", "Intensity", "RT", "Scan ID", "Scan Count", "RT Range"]
     return pd.DataFrame(rows, columns=columns)
 
 
 _MASS_COMPARISON_COLUMNS = [
     "Peak ID", "Fragment ID", "Sequence", "Charge", "Intensity", "Observed Mass", "Theoretical Mass",
     "ΔDa", "Δppm", "Recommended Formula", "Formula Candidates", "Known Modification",
-    "Modification Candidates", "MS2 Spectrum ID", "MS2 Matched Ions",
+    "Modification Candidates", "MS2 Spectrum ID", "MS2 Matched Ions", "Scan Count", "RT Range",
 ]
 
 
@@ -250,6 +267,7 @@ def _mass_comparison_frame(rows: list[MassComparisonRow]) -> pd.DataFrame:
             "Recommended Formula": row.recommended_formula or "", "Formula Candidates": row.formula_candidates,
             "Known Modification": row.known_modification or "", "Modification Candidates": row.modification_candidates,
             "MS2 Spectrum ID": row.ms2_spectrum_id or "", "MS2 Matched Ions": row.ms2_matched_ions,
+            "Scan Count": row.scan_count, "RT Range": _format_rt_range(row.scan_count, row.rt_range),
         }
         for row in rows
     ]

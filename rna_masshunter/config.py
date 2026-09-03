@@ -71,6 +71,21 @@ DEFAULT_CONFIG: dict[str, dict[str, Any]] = {
         "mz_min": 500,
         "mz_max": 3000,
         "intensity_threshold": 1000,
+        # §14B: collapse profile-mode split points (same scan, within
+        # merge_tolerance_ppm of each other) down to one peak per ion before
+        # anything downstream sees them. 10ppm comfortably covers the
+        # ~0.00002-0.00005 Da split observed on real profile-mode data
+        # without merging genuinely distinct nearby ions.
+        "merge_profile_points": True,
+        "merge_tolerance_ppm": 10,
+        # §14C: after within-scan merging, additionally collapse the same
+        # ion's repeated per-scan detections across a run of up to
+        # merge_max_scan_gap consecutive scans (reuses merge_tolerance_ppm
+        # for the m/z side). 2 is a provisional default — check it against
+        # the real gap distribution between consecutive detections of the
+        # same ion before trusting it unreviewed on a new dataset (§14C).
+        "merge_across_scans": True,
+        "merge_max_scan_gap": 2,
     },
 
     "ms2_annotation": {

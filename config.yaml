@@ -8,12 +8,12 @@ project:
   log_dir: "logs"
 
 input:
-  mzml_path: ""
+  mzml_path: "data/input/19 Gln2h.mzML"
 
 sequence:
-  name: "target_tRNA"
+  name: "target_tRNA^Gln2h"
   type: "RNA"
-  sequence: ""
+  sequence: "AGUCCUGUAGGGUAGUGGUCAAUCCUUCGGGCCUUUGGAGCCCGGGACAGCGGUUCGAAUCCGCUCAGGACUA"
 
 instrument:
   polarity: "negative"
@@ -52,6 +52,16 @@ ms1_peak_extraction:
   mz_min: 500
   mz_max: 3000
   intensity_threshold: 1000
+  # §14B: profile-mode mzML produces several split points per true ion;
+  # merge them (same scan, within merge_tolerance_ppm) before anything
+  # downstream sees them. Set merge_profile_points: false to disable.
+  merge_profile_points: true
+  merge_tolerance_ppm: 10
+  # §14C: also collapse the same ion's repeated per-scan detections across
+  # up to merge_max_scan_gap consecutive scans. 2 is provisional — check it
+  # against this dataset's actual gap distribution (see chat/§14C notes).
+  merge_across_scans: true
+  merge_max_scan_gap: 2
 
 ms2_annotation:
   enabled: true

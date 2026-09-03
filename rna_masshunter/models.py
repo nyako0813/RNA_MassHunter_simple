@@ -63,6 +63,13 @@ class Peak:
     scan_id: str | None = None
     ms_level: int = 1
     tier: str | None = None
+    # §14C: set when peak_picking.merge_peaks_across_scans() collapses
+    # several same-ion detections (one per scan) into this representative
+    # Peak, so the merge doesn't destroy the "how many scans / what RT span"
+    # information (仕様書 §14C). scan_count == 1 / rt_range is None for an
+    # ordinary, unmerged peak.
+    scan_count: int = 1
+    rt_range: tuple[float, float] | None = None
 
 
 @dataclass

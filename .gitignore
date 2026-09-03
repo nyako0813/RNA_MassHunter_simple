@@ -9,3 +9,8 @@ output/
 .cache/
 logs/
 *:Zone.Identifier
+
+# Raw instrument data (large binary files; keep local only, not in git)
+data/input/
+*.mzML
+*.mzml

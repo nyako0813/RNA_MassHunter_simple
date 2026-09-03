@@ -61,6 +61,12 @@ class MassComparisonRow:
     ms2_matched_ions: str = ""
     rt: float | None = None
     scan_id: str | None = None
+    # §14C: carried through from the matched Peak so a cross-scan merge
+    # (peak_picking.merge_peaks_across_scans) stays visible here too instead
+    # of silently collapsing reproducibility info. scan_count == 1 /
+    # rt_range is None for a peak that was not merged across scans.
+    scan_count: int = 1
+    rt_range: tuple[float, float] | None = None
     warnings: list[str] = field(default_factory=list)
 
 
@@ -242,6 +248,8 @@ def build_mass_comparison_rows(
                     modification_candidates=modification_candidates_str,
                     rt=peak.rt,
                     scan_id=peak.scan_id,
+                    scan_count=getattr(peak, "scan_count", 1),
+                    rt_range=getattr(peak, "rt_range", None),
                 )
 
                 if find_ms2_support is not None:
