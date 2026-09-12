@@ -7,18 +7,43 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 from rna_masshunter import simple_pipeline
+from rna_masshunter.trna_library import load_trna_library
+
+REPO_ROOT = Path(__file__).resolve().parent
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="RNA_MassHunter simple pipeline")
-    parser.add_argument("--config", required=True, help="Path to config.yaml")
-    return parser.parse_args(argv)
+    parser.add_argument("--config", help="Path to config.yaml")
+    parser.add_argument(
+        "--list-trna", action="store_true",
+        help="List available tRNA types from data/trna_library.yaml and exit.",
+    )
+    args = parser.parse_args(argv)
+    if not args.list_trna and not args.config:
+        parser.error("--config is required unless --list-trna is given")
+    return args
+
+
+def _list_trna(root: Path = REPO_ROOT) -> int:
+    library = load_trna_library(root / "data" / "trna_library.yaml")
+    if not library:
+        print("data/trna_library.yaml is empty or missing.", file=sys.stderr)
+        return 1
+    for entry_id in sorted(library):
+        entry = library[entry_id]
+        print(f"{entry_id}\t{entry.get('amino_acid')}\t{entry.get('anticodon')}\t{entry.get('length')}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if args.list_trna:
+        return _list_trna()
+
     result = simple_pipeline.run(args.config)
 
     for warning in result.get("warnings", []):

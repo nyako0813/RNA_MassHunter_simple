@@ -26,6 +26,7 @@ from rna_masshunter.ms2_support import build_ms2_ion_index
 from rna_masshunter.nucleoside_comparison import NucleosideComparisonRow, build_nucleoside_comparison_rows
 from rna_masshunter.nucleoside_targets import NucleosideTarget, build_nucleoside_target_universe
 from rna_masshunter.peak_picking import extract_ms1_peaks, merge_adjacent_profile_points, merge_peaks_across_scans
+from rna_masshunter.trna_library import apply_trna_type, load_trna_library
 from rna_masshunter.warnings_manager import add_warning
 
 # §24 (Phase 10): selecting this enzyme switches the whole pipeline into P1
@@ -64,6 +65,9 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
     """仕様書 §8.4 の手順:
 
     1. config読込・パス解決・バリデーション
+    1.5. trna_library.apply_trna_type() で config.sequence.trna_type から
+         sequence/anticodon/wobble_position を自動入力（tRNA種類選択機能、
+         tools/tRNA種類選択による配列自動入力機能_実装仕様書.md §4.2）
     2/3. 修飾YAML読込
     4. cca_processing.process_cca_tail() でCCA成熟化（配線: これが初めて
        process_cca_tail を呼び出す箇所）
@@ -97,6 +101,9 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
     config: RunConfig = config_module.load_config(config_path, warnings)
     config = config_module.resolve_paths(config, root)
     config_module.validate_config(config, warnings)
+
+    trna_library = load_trna_library(root / "data" / "trna_library.yaml")
+    apply_trna_type(config, warnings, trna_library)
 
     modifications: list[Modification] = load_modifications(root / "data" / "modifications.yaml", warnings)
     validate_modifications(modifications, warnings)

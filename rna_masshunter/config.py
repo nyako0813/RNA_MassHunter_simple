@@ -25,7 +25,17 @@ from rna_masshunter.warnings_manager import add_warning
 DEFAULT_CONFIG: dict[str, dict[str, Any]] = {
     "project": {"name": "RNA_MassHunter_simple", "output_dir": "output", "log_dir": "logs"},
     "input": {"mzml_path": ""},
-    "sequence": {"name": "target_tRNA", "type": "RNA", "sequence": ""},
+    "sequence": {
+        "name": "target_tRNA",
+        "type": "RNA",
+        # Set to a data/trna_library.yaml id to auto-fill sequence/anticodon/
+        # wobble_position instead of pasting them manually (see
+        # rna_masshunter/trna_library.py).
+        "trna_type": "",
+        "sequence": "",
+        "anticodon": "",
+        "wobble_position": None,
+    },
     "instrument": {"polarity": "negative"},
 
     "cca_processing": {
