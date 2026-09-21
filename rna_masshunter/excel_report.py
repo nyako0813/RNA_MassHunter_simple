@@ -172,7 +172,7 @@ SHEET_DESCRIPTIONS = {
     "05_Mass_Intensity": "Same as 04_Observed_Mass with Intensity as an explicit column.",
     "06_Mass_Comparison": "Fragment x charge x Peak matches: mass differences plus independent Formula/Modification Candidate columns.",
     "07_Modifications": "Known RNA modification database (data/modifications.yaml) used for Modification Candidate search.",
-    "07b_Hypothesis_Check": "Modification-hypothesis presence check: each hypothesis' theoretical mass (tRNA library defaults + config.hypothesis_check.targets) vs the raw peaks. Yes/No only — no automatic identification.",
+    "07b_Hypothesis_Check": "Modification-hypothesis presence check: each hypothesis' theoretical mass (tRNA library defaults + config.hypothesis_check.targets) vs the raw peaks. Yes/No only — no automatic identification. Confidence: confirmed / high_probability for tRNA-library defaults, blank for config targets.",
     "08_Visualization": "Scatter chart: Charge (x) vs ΔDa (y), sourced from 06_Mass_Comparison and colored by whether a Formula/Modification candidate was found.",
     # §24 (Phase 10) P1 complete-digestion mode: 03/06 are repurposed (see
     # write_nucleoside_mass_hunter_report), 04/05/07 are unchanged (peaks
@@ -339,7 +339,7 @@ def _nucleoside_comparison_frame(rows: list[NucleosideComparisonRow]) -> pd.Data
 
 
 _HYPOTHESIS_CHECK_COLUMNS = [
-    "Hypothesis_Name", "Source", "Formula_Description", "Theoretical_Mass", "Match_Found",
+    "Hypothesis_Name", "Source", "Confidence", "Formula_Description", "Theoretical_Mass", "Match_Found",
     "Matched_Peak_IDs", "Charge", "Observed_Mass", "ΔDa", "Δppm", "Intensity", "RT_Range",
 ]
 
@@ -358,7 +358,7 @@ def _hypothesis_check_frame(rows: list[HypothesisCheckRow]) -> pd.DataFrame:
     a hypothesis with no match gets a single Match_Found=No row."""
     data = [
         {
-            "Hypothesis_Name": row.hypothesis_name, "Source": row.source,
+            "Hypothesis_Name": row.hypothesis_name, "Source": row.source, "Confidence": row.confidence,
             "Formula_Description": row.formula_description, "Theoretical_Mass": row.theoretical_mass,
             "Match_Found": "Yes" if row.match_found else "No", "Matched_Peak_IDs": row.peak_id or "",
             "Charge": row.charge, "Observed_Mass": row.observed_mass, "ΔDa": row.delta_da,

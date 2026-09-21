@@ -59,7 +59,7 @@ def test_all_58_trna_entries_have_conserved_modifications_including_archaeosine_
     for trna_id, entry in library.items():
         mods = entry.get("conserved_modifications")
         assert mods, f"{trna_id} has no conserved_modifications"
-        assert any(m["position"] == 15 and m["modification"] == "G+" for m in mods), trna_id
+        assert any(m["position"] == 15 and m.get("modification") == "G+" for m in mods), trna_id
         assert entry["sequence"][14] == "G", trna_id
 
 
@@ -71,14 +71,14 @@ ILE2_ID = "tRNA-Ile2-CAT-1-1"  # anticodon CAU = tRNA-Ile(CAU)
 def test_only_ile2_cau_trna_carries_agmatidine_at_its_wobble_position():
     library = load_trna_library(REPO_ROOT / "data" / "trna_library.yaml")
     entry = library[ILE2_ID]
-    mods = [(m["position"], m["modification"]) for m in entry["conserved_modifications"]]
+    mods = [(m["position"], m["modification"]) for m in entry["conserved_modifications"] if "modification" in m]
     assert mods == [(15, "G+"), (entry["wobble_position"], "C+")]
     assert entry["sequence"][entry["wobble_position"] - 1] == "C"
     assert entry["sequence"][entry["wobble_position"] - 1:][:3] == entry["anticodon"]
     # every other entry keeps just the archaeosine default
     for trna_id, other in library.items():
         if trna_id != ILE2_ID:
-            assert [m["modification"] for m in other["conserved_modifications"]] == ["G+"], trna_id
+            assert [m["modification"] for m in other["conserved_modifications"] if "modification" in m] == ["G+"], trna_id
 
 
 def test_agmatidine_catalog_mass_matches_cytidine_plus_agmatine_minus_water(catalog):
@@ -90,15 +90,18 @@ def test_agmatidine_catalog_mass_matches_cytidine_plus_agmatine_minus_water(cata
     assert catalog["C+"] == pytest.approx(cytidine + agmatine - water, abs=1e-3)
 
 
-def test_ile2_conserved_modifications_merge_into_two_hypotheses_and_both_are_checked(catalog, modifications):
+def test_ile2_archaeosine_and_agmatidine_are_checked_alongside_rule_candidates(catalog, modifications):
     library = load_trna_library(REPO_ROOT / "data" / "trna_library.yaml")
     warnings: list[dict] = []
-    hypotheses = hypotheses_from_conserved_modifications(library[ILE2_ID], catalog, modifications, warnings)
+    all_hypotheses = hypotheses_from_conserved_modifications(library[ILE2_ID], catalog, modifications, warnings)
+    hypotheses = [h for h in all_hypotheses if h.name.endswith(("= G+", "= C+"))]
     assert [(h.name, round(h.theoretical_mass, 4), h.source) for h in hypotheses] == [
         (f"{ILE2_ID} position 15 = G+", 324.1182, SOURCE_TRNA_LIBRARY_DEFAULT),
         (f"{ILE2_ID} position 36 = C+", 355.1968, SOURCE_TRNA_LIBRARY_DEFAULT),
     ]
-    assert warnings == []  # both targets match the base at their position
+    assert [h.confidence for h in hypotheses] == ["high_probability", "confirmed"]
+    assert len(all_hypotheses) > 2  # Ile(CAU) also gets the A37 (t6A family) candidates
+    assert warnings == []  # every target matches the base at its position
 
     peaks = [
         Peak(mz=mz_from_neutral_mass(324.1182, 1, "positive"), intensity=100.0),
@@ -109,6 +112,151 @@ def test_ile2_conserved_modifications_merge_into_two_hypotheses_and_both_are_che
         (f"{ILE2_ID} position 15 = G+", True, 1),
         (f"{ILE2_ID} position 36 = C+", True, 2),
     ]
+
+
+# --- confidence tiers and position rules (conserved_modifications_confidence_tier_spec.md) ------
+
+sys.path.insert(0, str(REPO_ROOT / "tools"))
+import add_conserved_modifications as gen  # noqa: E402  (the reproducible generator for the library's rule entries)
+
+
+@pytest.fixture(scope="module")
+def library_entries():
+    return list(load_trna_library(REPO_ROOT / "data" / "trna_library.yaml").values())
+
+
+def test_discriminator_position_handles_with_and_without_cca():
+    assert gen.discriminator_position("GGGCCA") == 3
+    assert gen.discriminator_position("GGGCCC") == 6
+
+
+def test_canonical_positions_reproduce_spec_validation(library_entries):
+    # Anticodon 3rd base (standard 36) = U  ->  standard 37 is A, for all 16 such tRNAs.
+    u36 = [e for e in library_entries if e["anticodon"][2] == "U"]
+    assert len(u36) == 16
+    assert all(gen.base_at(e, gen.canonical_positions(e)[37]) == "A" for e in u36)
+    # tRNA-Phe(GAA): position 37 is G (wyosine substrate), not A.
+    phe = [e for e in library_entries if e["id"].startswith("tRNA-Phe-GAA-")]
+    assert len(phe) == 2
+    assert all(gen.base_at(e, gen.canonical_positions(e)[37]) == "G" for e in phe)
+    # Position 55 is U in 47 of 58 (81%).
+    assert sum(gen.base_at(e, gen.canonical_positions(e)[55]) == "U" for e in library_entries) == 47
+
+
+def test_wobble_position_matches_anticodon_except_known_ala_tgc_inconsistency(library_entries):
+    mismatched = [e["id"] for e in library_entries if e["sequence"][e["wobble_position"] - 1:][:3] != e["anticodon"]]
+    assert mismatched == ["tRNA-Ala-TGC-1-1"]  # known issue, data deliberately left unchanged (README)
+
+
+def _candidate_entries(entry):
+    return [m for m in entry["conserved_modifications"] if "modification_candidates" in m]
+
+
+@pytest.mark.parametrize("first_candidate, expected_count", [
+    ("Y", 47),        # U55            universal_U55_pseudouridine
+    ("cnm5U", 14),    # wobble U34     ma_U34_main_target
+    ("t6A", 34),      # A37            ma_A37_t6A
+    ("m1A", 47),      # A58            archaea_A58_methylation
+    ("imG-14", 2),    # tRNA-Phe G37
+])
+def test_each_rule_applies_to_the_expected_number_of_entries(library_entries, first_candidate, expected_count):
+    matching = [e for e in library_entries if any(m["modification_candidates"][0] == first_candidate for m in _candidate_entries(e))]
+    assert len(matching) == expected_count
+
+
+def test_rule_entries_carry_the_spec_candidate_lists_positions_and_tier(library_entries):
+    expected_candidates = {
+        "Y": ["Y"],
+        "cnm5U": ["cnm5U", "cmnm5U", "mnm5U", "mnm5s2U", "s2U", "s4U", "mcm5U", "mcm5s2U", "ncm5U", "ncm5Um"],
+        "t6A": ["t6A", "ms2t6A", "hn6A", "ms2hn6A"],
+        "m1A": ["m1A", "m6A"],  # generic "methylation" (no defined mass) intentionally omitted
+        "imG-14": ["imG-14", "imG", "imG2"],
+    }
+    for entry in library_entries:
+        positions = gen.canonical_positions(entry)
+        for item in _candidate_entries(entry):
+            assert item["confidence"] == "high_probability"
+            assert item["modification_candidates"] == expected_candidates[item["modification_candidates"][0]]
+            assert item["position"] in positions.values()
+    phe = next(e for e in library_entries if e["id"] == "tRNA-Phe-GAA-1-1")
+    assert [(m["position"], m["modification_candidates"][0]) for m in _candidate_entries(phe) if m["modification_candidates"][0] == "imG-14"] == [(phe["wobble_position"] + 3, "imG-14")]
+
+
+def test_no_rule_entries_where_the_base_does_not_match(library_entries):
+    for entry in library_entries:
+        positions = gen.canonical_positions(entry)
+        for item in _candidate_entries(entry):
+            base = gen.base_at(entry, item["position"])
+            first = item["modification_candidates"][0]
+            assert base == {"Y": "U", "cnm5U": "U", "t6A": "A", "m1A": "A", "imG-14": "G"}[first], entry["id"]
+    # wobble C (Ile2) gets no U34 rule; Ala-TGC (inconsistent wobble_position) gets no rule entries at all.
+    ile2 = next(e for e in library_entries if e["id"] == ILE2_ID)
+    assert not any(m["modification_candidates"][0] == "cnm5U" for m in _candidate_entries(ile2))
+    ala_tgc = next(e for e in library_entries if e["id"] == "tRNA-Ala-TGC-1-1")
+    assert _candidate_entries(ala_tgc) == []
+
+
+def test_confidence_tiers_of_curated_entries(library_entries):
+    for entry in library_entries:
+        for item in entry["conserved_modifications"]:
+            assert item["confidence"] in ("confirmed", "high_probability")
+            if item.get("modification") == "G+":
+                assert item["confidence"] == "high_probability" and "occasional absence" in item["note"]
+            if item.get("modification") == "C+":
+                assert item["confidence"] == "confirmed" and entry["id"] == ILE2_ID
+
+
+def test_library_yaml_is_in_sync_with_the_generator():
+    """Regenerating from the rules must reproduce data/trna_library.yaml exactly (hand edits belong in the generator)."""
+    assert gen.main(["--check"]) == 0
+
+
+def test_modification_candidates_expand_to_independent_hypotheses_sharing_position_and_confidence(catalog, modifications):
+    entry = {
+        "id": "t", "sequence": "A" * 40,
+        "conserved_modifications": [{"position": 37, "modification_candidates": ["t6A", "ms2t6A", "hn6A", "ms2hn6A"], "confidence": "high_probability", "note": "n"}],
+    }
+    warnings: list[dict] = []
+    hypotheses = hypotheses_from_conserved_modifications(entry, catalog, modifications, warnings)
+    assert [h.name for h in hypotheses] == [f"t position 37 = {label}" for label in ("t6A", "ms2t6A", "hn6A", "ms2hn6A")]
+    assert [round(h.theoretical_mass, 4) for h in hypotheses] == [round(catalog[l], 4) for l in ("t6A", "ms2t6A", "hn6A", "ms2hn6A")]
+    assert {h.confidence for h in hypotheses} == {"high_probability"}
+    assert warnings == []
+
+    # Each is matched independently: a peak at ms2t6A's mass only satisfies that candidate.
+    peaks = [Peak(mz=mz_from_neutral_mass(catalog["ms2t6A"], 1, "positive"), intensity=10.0)]
+    rows = check_hypotheses(hypotheses, peaks, _config())
+    assert {r.hypothesis_name: r.match_found for r in rows} == {
+        "t position 37 = t6A": False, "t position 37 = ms2t6A": True,
+        "t position 37 = hn6A": False, "t position 37 = ms2hn6A": False,
+    }
+    assert {r.confidence for r in rows} == {"high_probability"}  # tier carried onto both Yes and No rows
+
+
+def test_modification_and_candidates_in_one_entry_are_both_used_and_unknown_candidate_is_skipped(catalog, modifications):
+    entry = {"id": "t", "sequence": "A" * 40, "conserved_modifications": [
+        {"position": 37, "modification": "t6A", "modification_candidates": ["m1A", "methylation"], "confidence": "confirmed"},
+    ]}
+    warnings: list[dict] = []
+    hypotheses = hypotheses_from_conserved_modifications(entry, catalog, modifications, warnings)
+    assert [h.name for h in hypotheses] == ["t position 37 = t6A", "t position 37 = m1A"]
+    assert any(w["Level"] == "ERROR" and "methylation" in w["Message"] for w in warnings)
+
+
+def test_unknown_confidence_value_warns(catalog, modifications):
+    entry = {"id": "t", "sequence": "A" * 40, "conserved_modifications": [{"position": 37, "modification": "t6A", "confidence": "sure"}]}
+    warnings: list[dict] = []
+    hypotheses = hypotheses_from_conserved_modifications(entry, catalog, modifications, warnings)
+    assert len(hypotheses) == 1
+    assert any("unknown confidence" in w["Message"] for w in warnings)
+
+
+def test_every_rule_derived_label_exists_in_the_catalog_and_targets_the_right_base(library_entries, catalog, modifications):
+    """Loading each tRNA's defaults must be warning-free: labels exist and target the base at their position."""
+    for entry in library_entries:
+        warnings: list[dict] = []
+        hypotheses_from_conserved_modifications(entry, catalog, modifications, warnings)
+        assert warnings == [], (entry["id"], warnings)
 
 
 # --- §8-2/§8-3: theoretical masses ---------------------------------------------
@@ -202,10 +350,11 @@ def test_conserved_modifications_become_library_default_hypotheses(catalog, modi
     library = load_trna_library(REPO_ROOT / "data" / "trna_library.yaml")
     warnings: list[dict] = []
     hypotheses = hypotheses_from_conserved_modifications(library["tRNA-Gln-TTG-2-1"], catalog, modifications, warnings)
-    assert len(hypotheses) == 1
-    assert hypotheses[0].source == SOURCE_TRNA_LIBRARY_DEFAULT
-    assert hypotheses[0].theoretical_mass == pytest.approx(324.1182, abs=1e-4)
-    assert "position 15" in hypotheses[0].name and "G+" in hypotheses[0].name
+    assert all(h.source == SOURCE_TRNA_LIBRARY_DEFAULT for h in hypotheses)
+    archaeosine = [h for h in hypotheses if h.name.endswith("= G+")]
+    assert len(archaeosine) == 1
+    assert archaeosine[0].theoretical_mass == pytest.approx(324.1182, abs=1e-4)
+    assert "position 15" in archaeosine[0].name
     assert warnings == []  # G+ targets G and position 15 is G
 
 
@@ -371,12 +520,14 @@ def test_pipeline_writes_07b_sheet_with_yes_and_no_rows_and_merges_trna_defaults
     by_name = {}
     for row in result["hypothesis_check_rows"]:
         by_name.setdefault(row.hypothesis_name, []).append(row)
-    assert list(by_name) == [
-        "tRNA-Gln-TTG-2-1 position 15 = G+",  # library default first, then config targets
-        "m2,2G-PT-U dinucleotide", "m2,2G-PT-C dinucleotide", "cnm5s2U+O+S",
-    ]
+    names = list(by_name)
+    assert names[0] == "tRNA-Gln-TTG-2-1 position 15 = G+"  # library defaults first ...
+    assert names[-3:] == ["m2,2G-PT-U dinucleotide", "m2,2G-PT-C dinucleotide", "cnm5s2U+O+S"]  # ... then config targets
+    assert all(n.startswith("tRNA-Gln-TTG-2-1 position ") for n in names[:-3])
+    assert {row.confidence for name in names[-3:] for row in by_name[name]} == {""}
     assert by_name["tRNA-Gln-TTG-2-1 position 15 = G+"][0].source == SOURCE_TRNA_LIBRARY_DEFAULT
     assert by_name["tRNA-Gln-TTG-2-1 position 15 = G+"][0].charge == 2
+    assert by_name["tRNA-Gln-TTG-2-1 position 15 = G+"][0].confidence == "high_probability"
     # Peak IDs follow the pipeline's (m/z-sorted) peak list, same as every other sheet.
     pt_u_mz = mz_from_neutral_mass(pt_u, 1, "positive")
     pt_u_id = f"PK{next(i for i, p in enumerate(result['peaks']) if p.mz == pytest.approx(pt_u_mz)) + 1:04d}"
@@ -391,12 +542,14 @@ def test_pipeline_writes_07b_sheet_with_yes_and_no_rows_and_merges_trna_defaults
     ]
     ws = wb["07b_Hypothesis_Check"]
     assert [c.value for c in ws[3]] == [
-        "Hypothesis_Name", "Source", "Formula_Description", "Theoretical_Mass", "Match_Found",
+        "Hypothesis_Name", "Source", "Confidence", "Formula_Description", "Theoretical_Mass", "Match_Found",
         "Matched_Peak_IDs", "Charge", "Observed_Mass", "ΔDa", "Δppm", "Intensity", "RT_Range",
     ]
     rows = {r[0].value: [c.value for c in r] for r in ws.iter_rows(min_row=4)}
-    assert rows["m2,2G-PT-U dinucleotide"][4] == "Yes" and rows["m2,2G-PT-U dinucleotide"][5] == pt_u_id
-    assert rows["m2,2G-PT-C dinucleotide"][4] == "No"
+    assert rows["m2,2G-PT-U dinucleotide"][5] == "Yes" and rows["m2,2G-PT-U dinucleotide"][6] == pt_u_id
+    assert rows["m2,2G-PT-C dinucleotide"][5] == "No"
+    assert rows["m2,2G-PT-U dinucleotide"][2] in (None, "")  # config targets carry no confidence
+    assert rows["tRNA-Gln-TTG-2-1 position 15 = G+"][2] == "high_probability"
     assert wb["01_Index"]["A8"].value == "07b_Hypothesis_Check"
 
 
@@ -465,10 +618,15 @@ def test_pipeline_ile2_trna_type_checks_archaeosine_and_agmatidine(tmp_path, cat
     ])
     result = simple_pipeline.run(_pipeline_config(tmp_path, mzml_path, "", trna_type=ILE2_ID), project_root=REPO_ROOT)
 
-    found = {r.hypothesis_name: r.match_found for r in result["hypothesis_check_rows"]}
-    assert found == {f"{ILE2_ID} position 15 = G+": False, f"{ILE2_ID} position 36 = C+": True}
-    rows = {r[0].value: r[4].value for r in openpyxl.load_workbook(result["output_path"])["07b_Hypothesis_Check"].iter_rows(min_row=4)}
-    assert rows == {f"{ILE2_ID} position 15 = G+": "No", f"{ILE2_ID} position 36 = C+": "Yes"}
+    found = {r.hypothesis_name: (r.match_found, r.confidence) for r in result["hypothesis_check_rows"]}
+    assert found[f"{ILE2_ID} position 15 = G+"] == (False, "high_probability")
+    assert found[f"{ILE2_ID} position 36 = C+"] == (True, "confirmed")
+    # Excel: Confidence column shows archaeosine as high_probability and agmatidine as confirmed.
+    ws = openpyxl.load_workbook(result["output_path"])["07b_Hypothesis_Check"]
+    header = [c.value for c in ws[3]]
+    confidence_by_name = {r[header.index("Hypothesis_Name")].value: r[header.index("Confidence")].value for r in ws.iter_rows(min_row=4)}
+    assert confidence_by_name[f"{ILE2_ID} position 15 = G+"] == "high_probability"
+    assert confidence_by_name[f"{ILE2_ID} position 36 = C+"] == "confirmed"
 
 
 # --- §8-4: real-data verification (needs the git-ignored raw mzML) ------------------------------
@@ -491,5 +649,7 @@ def test_real_data_05_mix_m22g_pt_u_matches_pk72358_to_72360(tmp_path):
     assert not any(r.match_found for r in rows if r.hypothesis_name in ("m2,2G-PT-C dinucleotide", "cnm5s2U+O+S"))
 
     ws = openpyxl.load_workbook(result["output_path"])["07b_Hypothesis_Check"]
-    yes_ids = {r[5].value for r in ws.iter_rows(min_row=4) if r[0].value == "m2,2G-PT-U dinucleotide" and r[4].value == "Yes"}
+    header = [c.value for c in ws[3]]
+    name_col, match_col, peak_col = (header.index(n) for n in ("Hypothesis_Name", "Match_Found", "Matched_Peak_IDs"))
+    yes_ids = {r[peak_col].value for r in ws.iter_rows(min_row=4) if r[name_col].value == "m2,2G-PT-U dinucleotide" and r[match_col].value == "Yes"}
     assert {"PK72358", "PK72359", "PK72360"} <= yes_ids

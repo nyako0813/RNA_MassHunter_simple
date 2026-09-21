@@ -9,7 +9,9 @@ for masses that don't match.
 
 Two hypothesis sources feed the same matching logic (spec §3):
 - `conserved_modifications` on the tRNA selected via `sequence.trna_type`
-  (data/trna_library.yaml) -> source "trna_library_default"
+  (data/trna_library.yaml) -> source "trna_library_default", each entry
+  carrying a `confidence` tier and either one `modification` or a
+  `modification_candidates` list (expanded into independent hypotheses)
 - `config.hypothesis_check.targets` -> source "config_manual"
 
 Three target forms (spec §3.2, §4):
@@ -64,6 +66,9 @@ class Hypothesis:
     source: str
     description: str
     theoretical_mass: float
+    # "confirmed" / "high_probability" for trna_library defaults; "" for
+    # config.hypothesis_check.targets (ad-hoc hypotheses carry no tier).
+    confidence: str = ""
 
 
 @dataclass
@@ -73,6 +78,7 @@ class HypothesisCheckRow:
     formula_description: str
     theoretical_mass: float
     match_found: bool
+    confidence: str = ""
     peak_id: str | None = None
     charge: int | None = None
     observed_mass: float | None = None
@@ -166,18 +172,25 @@ def hypotheses_from_config_targets(config: RunConfig, catalog: dict[str, float])
     return [hypothesis_from_target(target, catalog, SOURCE_CONFIG_MANUAL) for target in targets]
 
 
+_VALID_CONFIDENCE = {"confirmed", "high_probability"}
+
+
 def hypotheses_from_conserved_modifications(
     trna_entry: dict[str, Any] | None,
     catalog: dict[str, float],
     modifications: list[Modification],
     warnings: list[dict[str, Any]] | None = None,
 ) -> list[Hypothesis]:
-    """One single-label hypothesis per `conserved_modifications` entry of the
-    selected tRNA (spec §3.1). A label missing from the catalog is skipped
-    with an ERROR warning rather than aborting the run (a hand-edited library
-    typo shouldn't take the whole report down). A modification whose
-    target_bases don't include the base at `position` gets a WARNING but is
-    still checked — the entry is a hypothesis, not a guarantee."""
+    """One hypothesis per label of each `conserved_modifications` entry of the
+    selected tRNA (spec §3.1). An entry gives its label either as a single
+    `modification` or as a `modification_candidates` list; every candidate
+    becomes its own independent hypothesis sharing the entry's position and
+    `confidence` (they are mutually exclusive in biology, but the check just
+    tests each one). A label missing from the catalog is skipped with an
+    ERROR warning rather than aborting the run (a hand-edited library typo
+    shouldn't take the whole report down). A modification whose target_bases
+    don't include the base at `position` gets a WARNING but is still checked
+    — the entry is a hypothesis, not a guarantee."""
     if not trna_entry:
         return []
     sequence = str(trna_entry.get("sequence") or "")
@@ -185,22 +198,27 @@ def hypotheses_from_conserved_modifications(
     hypotheses: list[Hypothesis] = []
     for item in trna_entry.get("conserved_modifications") or []:
         position = item.get("position")
-        label = str(item.get("modification") or "")
-        if label not in catalog:
-            if warnings is not None:
-                add_warning(warnings, "ERROR", "hypothesis_check", f"{trna_entry.get('id')}: conserved modification {label!r} at position {position} is not in the nucleoside catalog; skipped.")
-            continue
+        labels = ([item["modification"]] if item.get("modification") else []) + list(item.get("modification_candidates") or [])
+        confidence = str(item.get("confidence") or "")
+        if confidence and confidence not in _VALID_CONFIDENCE and warnings is not None:
+            add_warning(warnings, "WARNING", "hypothesis_check", f"{trna_entry.get('id')}: position {position} has unknown confidence {confidence!r} (expected one of {sorted(_VALID_CONFIDENCE)}).")
         base_at_position = sequence[position - 1].upper() if isinstance(position, int) and 1 <= position <= len(sequence) else None
-        expected = target_bases_by_label.get(label)
-        if warnings is not None and base_at_position and expected and base_at_position not in expected:
-            add_warning(warnings, "WARNING", "hypothesis_check", f"{trna_entry.get('id')}: position {position} is {base_at_position} but {label} targets {expected}.")
-        mass = catalog[label]
-        hypotheses.append(Hypothesis(
-            name=f"{trna_entry.get('id')} position {position} = {label}",
-            source=SOURCE_TRNA_LIBRARY_DEFAULT,
-            description=f"{label} ({mass:.4f})" + (f" — {item['note']}" if item.get("note") else ""),
-            theoretical_mass=mass,
-        ))
+        for label in map(str, labels):
+            if label not in catalog:
+                if warnings is not None:
+                    add_warning(warnings, "ERROR", "hypothesis_check", f"{trna_entry.get('id')}: conserved modification {label!r} at position {position} is not in the nucleoside catalog; skipped.")
+                continue
+            expected = target_bases_by_label.get(label)
+            if warnings is not None and base_at_position and expected and base_at_position not in expected:
+                add_warning(warnings, "WARNING", "hypothesis_check", f"{trna_entry.get('id')}: position {position} is {base_at_position} but {label} targets {expected}.")
+            mass = catalog[label]
+            hypotheses.append(Hypothesis(
+                name=f"{trna_entry.get('id')} position {position} = {label}",
+                source=SOURCE_TRNA_LIBRARY_DEFAULT,
+                description=f"{label} ({mass:.4f})" + (f" — {item['note']}" if item.get("note") else ""),
+                theoretical_mass=mass,
+                confidence=confidence,
+            ))
     return hypotheses
 
 
@@ -238,7 +256,7 @@ def check_hypotheses(hypotheses: list[Hypothesis], peaks: list[Peak], config: Ru
                 matches.append(HypothesisCheckRow(
                     hypothesis_name=hypothesis.name, source=hypothesis.source,
                     formula_description=hypothesis.description, theoretical_mass=theoretical,
-                    match_found=True, peak_id=id_by_object.get(id(peak)), charge=charge,
+                    match_found=True, confidence=hypothesis.confidence, peak_id=id_by_object.get(id(peak)), charge=charge,
                     observed_mass=observed, delta_da=delta_da, delta_ppm=delta_ppm,
                     intensity=peak.intensity, rt=peak.rt,
                     scan_count=getattr(peak, "scan_count", 1), rt_range=getattr(peak, "rt_range", None),
@@ -250,5 +268,6 @@ def check_hypotheses(hypotheses: list[Hypothesis], peaks: list[Peak], config: Ru
             rows.append(HypothesisCheckRow(
                 hypothesis_name=hypothesis.name, source=hypothesis.source,
                 formula_description=hypothesis.description, theoretical_mass=theoretical, match_found=False,
+                confidence=hypothesis.confidence,
             ))
     return rows

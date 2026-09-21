@@ -4,14 +4,27 @@
 # `sequence`/`anticodon` are RNA (U) notation; `anticodon_gene_notation` keeps
 # the source table's T notation for reference.
 #
-# conserved_modifications (hypothesis_mass_check_spec.md §3.1): per-tRNA default
-# modification hypotheses checked against the raw MS1 peaks by
-# rna_masshunter/hypothesis_check.py when sequence.trna_type selects the entry.
-# `position` is 1-based on `sequence`; `modification` is a label from
-# data/modifications.yaml.
-# 要生物学的最終確認: position 15 -> G+ (archaeosine) was added mechanically to
-# all 58 entries (position 15 is G in every one). If it is wrong for a given
-# tRNA, edit or delete that entry's conserved_modifications by hand.
+# conserved_modifications: per-tRNA default modification hypotheses checked
+# against the raw MS1 peaks by rna_masshunter/hypothesis_check.py when
+# sequence.trna_type selects the entry.
+#   position                 1-based running number on `sequence` (not the
+#                            standard/Sprinzl number).
+#   modification             a single label from data/modifications.yaml, or
+#   modification_candidates  a list of such labels (mutually exclusive
+#                            hypotheses for the same position; each is
+#                            checked independently).
+#   confidence               confirmed        directly detected in this
+#                                             species/strain (e.g. agmatidine)
+#                            high_probability inferred from a general rule;
+#                                             not confirmed per tRNA
+# Regenerate with tools/add_conserved_modifications.py (idempotent; see
+# claude_code/conserved_modifications_confidence_tier_spec.md). The G+ (15)
+# and C+ (Ile2 wobble) entries are hand-curated inputs to that script; the
+# modification_candidates entries are rebuilt from base/position rules.
+#
+# 既知の要確認事項: tRNA-Ala-TGC-1-1 は wobble_position=37 だが、配列の37-39番目は
+# AAG でアンチコドン(UGC)と一致しない（UGC は配列の34-36番目）。データ自体は
+# 未変更。この不整合のため、このエントリには位置ルール由来の候補が付かない。
 trna_library:
 - id: tRNA-Ala-CGC-1-1
   amino_acid: Ala
@@ -25,7 +38,16 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
 - id: tRNA-Ala-GGC-1-1
   amino_acid: Ala
   anticodon: GGC
@@ -38,7 +60,16 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
 - id: tRNA-Ala-TGC-1-1
   amino_acid: Ala
   anticodon: UGC
@@ -51,7 +82,8 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
 - id: tRNA-Arg-CCG-1-1
   amino_acid: Arg
   anticodon: CCG
@@ -64,7 +96,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Arg-CCT-1-1
   amino_acid: Arg
   anticodon: CCU
@@ -77,7 +121,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 39
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Arg-GCG-1-1
   amino_acid: Arg
   anticodon: GCG
@@ -90,7 +154,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Arg-TCG-1-1
   amino_acid: Arg
   anticodon: UCG
@@ -103,7 +179,41 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 39
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 56
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 59
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Arg-TCT-1-1
   amino_acid: Arg
   anticodon: UCU
@@ -116,7 +226,41 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 39
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Asn-GTT-1-1
   amino_acid: Asn
   anticodon: GUU
@@ -129,7 +273,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 55
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 58
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Asn-GTT-1-2
   amino_acid: Asn
   anticodon: GUU
@@ -142,7 +306,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 55
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 58
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Asp-GTC-1-1
   amino_acid: Asp
   anticodon: GUC
@@ -155,7 +339,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 55
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 58
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Cys-GCA-1-1
   amino_acid: Cys
   anticodon: GCA
@@ -168,7 +364,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Cys-GCA-2-1
   amino_acid: Cys
   anticodon: GCA
@@ -181,7 +389,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Cys-GCA-3-1
   amino_acid: Cys
   anticodon: GCA
@@ -194,7 +414,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gln-CTG-1-1
   amino_acid: Gln
   anticodon: CUG
@@ -207,7 +447,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 55
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 58
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gln-TTG-2-1
   amino_acid: Gln
   anticodon: UUG
@@ -220,7 +472,33 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 35
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 55
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 58
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gln-TTG-1-1
   amino_acid: Gln
   anticodon: UUG
@@ -233,7 +511,33 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Glu-CTC-1-1
   amino_acid: Glu
   anticodon: CUC
@@ -246,7 +550,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 40
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Glu-TTC-1-1
   amino_acid: Glu
   anticodon: UUC
@@ -259,7 +583,33 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Glu-TTC-1-2
   amino_acid: Glu
   anticodon: UUC
@@ -272,7 +622,33 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gly-CCC-1-1
   amino_acid: Gly
   anticodon: CCC
@@ -285,7 +661,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gly-GCC-1-1
   amino_acid: Gly
   anticodon: GCC
@@ -298,7 +694,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gly-GCC-1-2
   amino_acid: Gly
   anticodon: GCC
@@ -311,7 +727,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gly-GCC-1-3
   amino_acid: Gly
   anticodon: GCC
@@ -324,7 +760,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Gly-TCC-1-1
   amino_acid: Gly
   anticodon: UCC
@@ -337,7 +793,41 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 34
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-His-GTG-1-1
   amino_acid: His
   anticodon: GUG
@@ -350,7 +840,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 55
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 58
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Ile-GAT-1-1
   amino_acid: Ile
   anticodon: GAU
@@ -363,7 +865,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 56
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 59
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Ile-GAT-1-2
   amino_acid: Ile
   anticodon: GAU
@@ -376,7 +898,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 56
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 59
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Ile2-CAT-1-1
   amino_acid: Ile2
   anticodon: CAU
@@ -389,10 +931,20 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
   - position: 36
     modification: C+
+    confidence: confirmed
     note: agmatidine at wobble C34; confirmed by LC-MS in M. acetivorans C2A Δhpt tRNA (Gregorova et al. 2020, RNA Biol, DOI:10.1080/15476286.2020.1853385)
+  - position: 39
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
 - id: tRNA-iMet-CAT-1-1
   amino_acid: iMet
   anticodon: CAU
@@ -405,7 +957,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 39
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-iMet-CAT-1-2
   amino_acid: iMet
   anticodon: CAU
@@ -418,7 +990,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 39
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Leu-CAA-1-1
   amino_acid: Leu
   anticodon: CAA
@@ -431,7 +1023,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 65
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 68
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Leu-CAG-1-1
   amino_acid: Leu
   anticodon: CAG
@@ -444,7 +1048,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 40
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 67
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 70
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Leu-GAG-1-1
   amino_acid: Leu
   anticodon: GAG
@@ -457,7 +1081,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 67
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 70
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Leu-GAG-2-1
   amino_acid: Leu
   anticodon: GAG
@@ -470,7 +1106,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 67
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 70
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Leu-TAA-1-1
   amino_acid: Leu
   anticodon: UAA
@@ -483,7 +1131,33 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 67
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 70
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Leu-TAG-1-1
   amino_acid: Leu
   anticodon: UAG
@@ -496,7 +1170,33 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 67
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 70
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Lys-CTT-1-1
   amino_acid: Lys
   anticodon: CUU
@@ -509,7 +1209,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 56
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 59
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Lys-TTT-1-1
   amino_acid: Lys
   anticodon: UUU
@@ -522,7 +1242,41 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 35
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 56
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 59
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Met-CAT-1-1
   amino_acid: Met
   anticodon: CAU
@@ -535,7 +1289,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 56
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 59
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Phe-GAA-1-1
   amino_acid: Phe
   anticodon: GAA
@@ -548,7 +1322,26 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - imG-14
+    - imG
+    - imG2
+    confidence: high_probability
+    note: 'standard position 37 (wobble + 3); base is G; wyosine-pathway modifications are near-universal at position 37 of tRNA-Phe(GAA) in eukaryotes and archaea (G37 is their substrate). Additional support: this mass group (321.11 / 335.12 Da) was detected at multiple peaks with sufficient intensity in RNA_MassHunter_simple_report.xlsx.'
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Phe-GAA-1-2
   amino_acid: Phe
   anticodon: GAA
@@ -561,7 +1354,26 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - imG-14
+    - imG
+    - imG2
+    confidence: high_probability
+    note: 'standard position 37 (wobble + 3); base is G; wyosine-pathway modifications are near-universal at position 37 of tRNA-Phe(GAA) in eukaryotes and archaea (G37 is their substrate). Additional support: this mass group (321.11 / 335.12 Da) was detected at multiple peaks with sufficient intensity in RNA_MassHunter_simple_report.xlsx.'
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Pro-CGG-1-1
   amino_acid: Pro
   anticodon: CGG
@@ -574,7 +1386,8 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
 - id: tRNA-Pro-GGG-1-1
   amino_acid: Pro
   anticodon: GGG
@@ -587,7 +1400,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 57
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 60
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Pro-TGG-1-1
   amino_acid: Pro
   anticodon: UGG
@@ -600,7 +1425,22 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 37
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
 - id: tRNA-Ser-CGA-1-1
   amino_acid: Ser
   anticodon: CGA
@@ -613,7 +1453,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 62
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 65
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Ser-GCT-1-1
   amino_acid: Ser
   anticodon: GCU
@@ -626,7 +1486,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 67
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 70
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Ser-GGA-1-1
   amino_acid: Ser
   anticodon: GGA
@@ -639,7 +1519,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 65
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 68
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Ser-TGA-1-1
   amino_acid: Ser
   anticodon: UGA
@@ -652,7 +1552,41 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 35
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 67
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 70
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Thr-CGT-1-1
   amino_acid: Thr
   anticodon: CGU
@@ -665,7 +1599,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Thr-GGT-1-1
   amino_acid: Thr
   anticodon: GGU
@@ -678,7 +1632,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 36
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Thr-TGT-1-1
   amino_acid: Thr
   anticodon: UGU
@@ -691,7 +1665,41 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 35
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+  - position: 56
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 59
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Trp-CCA-1-1
   amino_acid: Trp
   anticodon: CCA
@@ -704,7 +1712,8 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
 - id: tRNA-Tyr-GTA-1-1
   amino_acid: Tyr
   anticodon: GUA
@@ -717,7 +1726,19 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 54
+    modification_candidates:
+    - Y
+    confidence: high_probability
+    note: 'standard position 55 (discriminator - 18); base is U; pseudouridine is near-universal (archaea_general.yaml universal_U55_pseudouridine). Note: pseudouridine is isobaric with U, so a mass match here cannot distinguish it from unmodified U.'
+  - position: 57
+    modification_candidates:
+    - m1A
+    - m6A
+    confidence: high_probability
+    note: 'standard position 58 (discriminator - 15); base is A; candidate set from rule_sets/archaea_general.yaml archaea_A58_methylation (generic ''methylation'' omitted: m1A/m6A cover the same +CH2 mass).'
 - id: tRNA-Val-CAC-1-1
   amino_acid: Val
   anticodon: CAC
@@ -730,7 +1751,16 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
 - id: tRNA-Val-GAC-1-1
   amino_acid: Val
   anticodon: GAC
@@ -743,7 +1773,16 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
 - id: tRNA-Val-GAC-1-2
   amino_acid: Val
   anticodon: GAC
@@ -756,7 +1795,16 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
 - id: tRNA-Val-TAC-1-1
   amino_acid: Val
   anticodon: UAC
@@ -769,4 +1817,27 @@ trna_library:
   conserved_modifications:
   - position: 15
     modification: G+
-    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+    confidence: high_probability
+    note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 35
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 38
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
