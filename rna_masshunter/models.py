@@ -31,6 +31,7 @@ class RunConfig:
     ms2_annotation: dict[str, Any] = field(default_factory=dict)
     formula_candidate: dict[str, Any] = field(default_factory=dict)
     mass_comparison: dict[str, Any] = field(default_factory=dict)
+    hypothesis_check: dict[str, Any] = field(default_factory=dict)
     reporting: dict[str, Any] = field(default_factory=dict)
     visualization: dict[str, Any] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)

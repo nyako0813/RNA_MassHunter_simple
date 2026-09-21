@@ -17,6 +17,14 @@ from typing import Any
 from rna_masshunter import config as config_module
 from rna_masshunter.cca_processing import CCAProcessingResult, process_cca_tail
 from rna_masshunter.digestion import digest_sequence
+from rna_masshunter.hypothesis_check import (
+    Hypothesis,
+    HypothesisCheckRow,
+    build_label_mass_catalog,
+    check_hypotheses,
+    hypotheses_from_config_targets,
+    hypotheses_from_conserved_modifications,
+)
 from rna_masshunter.mass_comparison import MassComparisonRow, build_mass_comparison_rows
 from rna_masshunter.masses import calculate_unmodified_rna_mass, load_base_masses
 from rna_masshunter.models import Fragment, Modification, Peak, RunConfig
@@ -85,6 +93,11 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
     11. config.reporting.excel_output が真の場合のみExcel出力
         （excel_report.py はPhase 5で追加されるため、ここでは遅延import —
         呼ばれるのは実際にExcel出力が有効な場合のみ）
+    11b. hypothesis_check（仮説の理論質量チェック、hypothesis_mass_check_spec.md）:
+        sequence.trna_type で選択したtRNAの conserved_modifications と
+        config.hypothesis_check.targets を仮説リストにマージし、統合後の
+        peaksと照合する（P1モード・オリゴマーモード共通）。仮説が1件も
+        無ければ何もしない。
     12. テスト・CLI双方から使えるよう dict で結果を返す
 
     §24（Phase 10）: `config.digestion.enzyme` が "Nuclease_P1" の場合は
@@ -108,6 +121,17 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
     modifications: list[Modification] = load_modifications(root / "data" / "modifications.yaml", warnings)
     validate_modifications(modifications, warnings)
     base_masses = load_base_masses(root / "data" / "base_masses.yaml", warnings)
+
+    hypotheses: list[Hypothesis] = []
+    if bool((config.hypothesis_check or {}).get("enabled", True)):
+        # Built before the (slow) mzML read so a malformed/unknown-label
+        # config target fails fast.
+        catalog = build_label_mass_catalog(modifications, warnings)
+        selected_trna = trna_library.get(str(config.sequence.get("trna_type") or "").strip())
+        hypotheses = (
+            hypotheses_from_conserved_modifications(selected_trna, catalog, modifications, warnings)
+            + hypotheses_from_config_targets(config, catalog)
+        )
 
     is_p1_mode = str(config.digestion.get("enzyme") or "").strip() == _P1_COMPLETE_DIGESTION_ENZYME
     nucleoside_targets: list[NucleosideTarget] = []
@@ -188,6 +212,16 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
             ms2_spectra=ms2_spectra or None, ms2_ion_index=ms2_ion_index or None,
         )
 
+    # hypothesis_mass_check_spec.md: presence check of each hypothesis' theoretical
+    # mass against the same (merged) peaks every other sheet uses. None (not
+    # []) means "not run", so the Excel writers omit 07b_Hypothesis_Check.
+    hypothesis_rows: list[HypothesisCheckRow] | None = None
+    if hypotheses:
+        if mzml_path:
+            hypothesis_rows = check_hypotheses(hypotheses, peaks, config)
+        else:
+            add_warning(warnings, "WARNING", "simple_pipeline", "input.mzml_path is empty; hypothesis_check was skipped.")
+
     output_path: Path | None = None
     if bool(config.reporting.get("excel_output", True)):
         output_dir = Path(str(config.project.get("output_dir") or "output"))
@@ -198,11 +232,11 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
         if is_p1_mode:
             from rna_masshunter.excel_report import write_nucleoside_mass_hunter_report
 
-            write_nucleoside_mass_hunter_report(output_path, config, nucleoside_targets, peaks, nucleoside_rows, modifications, base_masses, warnings=warnings)
+            write_nucleoside_mass_hunter_report(output_path, config, nucleoside_targets, peaks, nucleoside_rows, modifications, base_masses, warnings=warnings, hypothesis_rows=hypothesis_rows)
         else:
             from rna_masshunter.excel_report import write_simple_mass_hunter_report
 
-            write_simple_mass_hunter_report(output_path, config, fragments, peaks, rows, modifications, warnings=warnings)
+            write_simple_mass_hunter_report(output_path, config, fragments, peaks, rows, modifications, warnings=warnings, hypothesis_rows=hypothesis_rows)
 
     return {
         "config": config,
@@ -216,5 +250,7 @@ def run(config_path: str | Path, project_root: str | Path | None = None) -> dict
         "mass_comparison_rows": rows,
         "nucleoside_targets": nucleoside_targets,
         "nucleoside_comparison_rows": nucleoside_rows,
+        "hypotheses": hypotheses,
+        "hypothesis_check_rows": hypothesis_rows or [],
         "output_path": str(output_path) if output_path else None,
     }

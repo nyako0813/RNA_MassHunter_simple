@@ -141,6 +141,20 @@ DEFAULT_CONFIG: dict[str, dict[str, Any]] = {
         "nucleoside_mz_tolerance_ppm": 10,
     },
 
+    # hypothesis_mass_check_spec.md §3.2: user-specified modification
+    # hypotheses (in addition to a selected tRNA's conserved_modifications
+    # from data/trna_library.yaml) whose theoretical mass is checked against
+    # the raw MS1 peaks — a yes/no presence check only, never an automatic
+    # identification of what an observed mass "is". Empty `targets` by
+    # default; see rna_masshunter/hypothesis_check.py for the target forms
+    # (label / components+linkage / base+add_elements).
+    "hypothesis_check": {
+        "enabled": True,
+        "mass_tolerance_ppm": 15,
+        "max_charge": 4,
+        "targets": [],
+    },
+
     "reporting": {
         "excel_output": True,
         "output_filename": "RNA_MassHunter_simple_report.xlsx",
@@ -232,6 +246,17 @@ def validate_config(config: RunConfig, warnings: list[dict[str, Any]] | None = N
         max_matches = mc.get("max_matches_per_fragment")
         if not isinstance(max_matches, int) or max_matches <= 0:
             raise ValueError("mass_comparison.max_matches_per_fragment must be a positive integer")
+
+    hc = config.hypothesis_check
+    if hc.get("enabled"):
+        tolerance_ppm = hc.get("mass_tolerance_ppm")
+        if isinstance(tolerance_ppm, bool) or not isinstance(tolerance_ppm, (int, float)) or tolerance_ppm <= 0:
+            raise ValueError("hypothesis_check.mass_tolerance_ppm must be a positive number")
+        max_charge = hc.get("max_charge")
+        if isinstance(max_charge, bool) or not isinstance(max_charge, int) or max_charge <= 0:
+            raise ValueError("hypothesis_check.max_charge must be a positive integer")
+        if hc.get("targets") is not None and not isinstance(hc.get("targets"), list):
+            raise ValueError("hypothesis_check.targets must be a list")
 
 
 def resolve_paths(config: RunConfig, project_root: str | Path) -> RunConfig:

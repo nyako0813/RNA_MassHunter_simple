@@ -3,6 +3,15 @@
 # tools/tRNA種類選択による配列自動入力機能_実装仕様書.md for the field reference.
 # `sequence`/`anticodon` are RNA (U) notation; `anticodon_gene_notation` keeps
 # the source table's T notation for reference.
+#
+# conserved_modifications (hypothesis_mass_check_spec.md §3.1): per-tRNA default
+# modification hypotheses checked against the raw MS1 peaks by
+# rna_masshunter/hypothesis_check.py when sequence.trna_type selects the entry.
+# `position` is 1-based on `sequence`; `modification` is a label from
+# data/modifications.yaml.
+# 要生物学的最終確認: position 15 -> G+ (archaeosine) was added mechanically to
+# all 58 entries (position 15 is G in every one). If it is wrong for a given
+# tRNA, edit or delete that entry's conserved_modifications by hand.
 trna_library:
 - id: tRNA-Ala-CGC-1-1
   amino_acid: Ala
@@ -13,6 +22,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 23333.068
   isotype_model_note: Ala (101.0 bits) / Arg (60.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ala-GGC-1-1
   amino_acid: Ala
   anticodon: GGC
@@ -22,6 +35,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 23342.028
   isotype_model_note: Ala (104.8 bits) / Gly (48.8 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ala-TGC-1-1
   amino_acid: Ala
   anticodon: UGC
@@ -31,6 +48,10 @@ trna_library:
   length: 73
   reference_unmodified_mass_5p_cca: 23632.197
   isotype_model_note: Ala (100.6 bits) / Arg (61.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Arg-CCG-1-1
   amino_acid: Arg
   anticodon: CCG
@@ -40,6 +61,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24203.0831
   isotype_model_note: Arg (65.6 bits) / Gly (65.6 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Arg-CCT-1-1
   amino_acid: Arg
   anticodon: CCU
@@ -49,6 +74,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 25148.6651
   isotype_model_note: Arg (98.6 bits) / Lys (67.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Arg-GCG-1-1
   amino_acid: Arg
   anticodon: GCG
@@ -58,6 +87,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24244.0931
   isotype_model_note: Arg (77.2 bits) / His (77.1 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Arg-TCG-1-1
   amino_acid: Arg
   anticodon: UCG
@@ -67,6 +100,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 24885.4761
   isotype_model_note: Arg (86.7 bits) / Gly (53.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Arg-TCT-1-1
   amino_acid: Arg
   anticodon: UCU
@@ -76,6 +113,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 24203.0831
   isotype_model_note: Arg (96.1 bits) / Lys (94.7 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Asn-GTT-1-1
   amino_acid: Asn
   anticodon: GUU
@@ -85,6 +126,10 @@ trna_library:
   length: 73
   reference_unmodified_mass_5p_cca: 24511.2221
   isotype_model_note: Asn (100.2 bits) / Ile2 (52.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Asn-GTT-1-2
   amino_acid: Asn
   anticodon: GUU
@@ -94,6 +139,10 @@ trna_library:
   length: 73
   reference_unmodified_mass_5p_cca: 24511.2221
   isotype_model_note: Asn (100.2 bits) / Ile2 (52.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Asp-GTC-1-1
   amino_acid: Asp
   anticodon: GUC
@@ -103,6 +152,10 @@ trna_library:
   length: 73
   reference_unmodified_mass_5p_cca: 24555.2821
   isotype_model_note: Asp (100.8 bits) / His (76.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Cys-GCA-1-1
   amino_acid: Cys
   anticodon: GCA
@@ -112,6 +165,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24162.0731
   isotype_model_note: Cys (94.5 bits) / His (26.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Cys-GCA-2-1
   amino_acid: Cys
   anticodon: GCA
@@ -121,6 +178,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24148.0431
   isotype_model_note: Cys (92.4 bits) / His (23.8 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Cys-GCA-3-1
   amino_acid: Cys
   anticodon: GCA
@@ -130,6 +191,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24070.9481
   isotype_model_note: Cys (70.3 bits) / Thr (18.8 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gln-CTG-1-1
   amino_acid: Gln
   anticodon: CUG
@@ -139,6 +204,10 @@ trna_library:
   length: 73
   reference_unmodified_mass_5p_cca: 24485.2271
   isotype_model_note: Gln (95.7 bits) / Arg (53.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gln-TTG-2-1
   amino_acid: Gln
   anticodon: UUG
@@ -148,6 +217,10 @@ trna_library:
   length: 73
   reference_unmodified_mass_5p_cca: 24525.2521
   isotype_model_note: Gln (102.4 bits) / Glu (64.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gln-TTG-1-1
   amino_acid: Gln
   anticodon: UUG
@@ -157,6 +230,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 25101.7001
   isotype_model_note: Gln (70.8 bits) / Glu (54.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Glu-CTC-1-1
   amino_acid: Glu
   anticodon: CUC
@@ -166,6 +243,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 24967.5451
   isotype_model_note: Glu (108.6 bits) / Asp (81.6 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Glu-TTC-1-1
   amino_acid: Glu
   anticodon: UUC
@@ -175,6 +256,10 @@ trna_library:
   length: 78
   reference_unmodified_mass_5p_cca: 25094.067
   isotype_model_note: Glu (120.7 bits) / Asp (91.8 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Glu-TTC-1-2
   amino_acid: Glu
   anticodon: UUC
@@ -184,6 +269,10 @@ trna_library:
   length: 78
   reference_unmodified_mass_5p_cca: 25094.067
   isotype_model_note: Glu (120.7 bits) / Asp (91.8 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gly-CCC-1-1
   amino_acid: Gly
   anticodon: CCC
@@ -193,6 +282,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24124.0181
   isotype_model_note: Gly (86.6 bits) / Pro (50.6 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gly-GCC-1-1
   amino_acid: Gly
   anticodon: GCC
@@ -202,6 +295,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24162.0731
   isotype_model_note: Gly (79.7 bits) / Gln (48.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gly-GCC-1-2
   amino_acid: Gly
   anticodon: GCC
@@ -211,6 +308,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24162.0731
   isotype_model_note: Gly (79.7 bits) / Gln (48.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gly-GCC-1-3
   amino_acid: Gly
   anticodon: GCC
@@ -220,6 +321,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24162.0731
   isotype_model_note: Gly (79.7 bits) / Gln (48.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Gly-TCC-1-1
   amino_acid: Gly
   anticodon: UCC
@@ -229,6 +334,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24138.0481
   isotype_model_note: Gly (93.0 bits) / Arg (65.1 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-His-GTG-1-1
   amino_acid: His
   anticodon: GUG
@@ -238,6 +347,10 @@ trna_library:
   length: 73
   reference_unmodified_mass_5p_cca: 23937.1745
   isotype_model_note: His (90.3 bits) / Asp (58.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ile-GAT-1-1
   amino_acid: Ile
   anticodon: GAU
@@ -247,6 +360,10 @@ trna_library:
   length: 77
   reference_unmodified_mass_5p_cca: 24922.988
   isotype_model_note: Ile (123.2 bits) / Ile2 (107.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ile-GAT-1-2
   amino_acid: Ile
   anticodon: GAU
@@ -256,6 +373,10 @@ trna_library:
   length: 77
   reference_unmodified_mass_5p_cca: 24922.988
   isotype_model_note: Ile (123.2 bits) / Ile2 (107.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ile2-CAT-1-1
   amino_acid: Ile2
   anticodon: CAU
@@ -265,6 +386,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 24200.57
   isotype_model_note: Ile2 (116.1 bits) / Ile (101.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-iMet-CAT-1-1
   amino_acid: iMet
   anticodon: CAU
@@ -274,6 +399,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 25202.7701
   isotype_model_note: iMet (120.0 bits) / Gln (71.0 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-iMet-CAT-1-2
   amino_acid: iMet
   anticodon: CAU
@@ -283,6 +412,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 25202.7701
   isotype_model_note: iMet (120.0 bits) / Gln (71.0 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Leu-CAA-1-1
   amino_acid: Leu
   anticodon: CAA
@@ -292,6 +425,10 @@ trna_library:
   length: 83
   reference_unmodified_mass_5p_cca: 27737.2421
   isotype_model_note: Leu (103.6 bits) / Ser (79.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Leu-CAG-1-1
   amino_acid: Leu
   anticodon: CAG
@@ -301,6 +438,10 @@ trna_library:
   length: 85
   reference_unmodified_mass_5p_cca: 28380.5951
   isotype_model_note: Leu (110.8 bits) / Ser (58.1 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Leu-GAG-1-1
   amino_acid: Leu
   anticodon: GAG
@@ -310,6 +451,10 @@ trna_library:
   length: 88
   reference_unmodified_mass_5p_cca: 28422.047
   isotype_model_note: Leu (125.1 bits) / Ser (75.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Leu-GAG-2-1
   amino_acid: Leu
   anticodon: GAG
@@ -319,6 +464,10 @@ trna_library:
   length: 85
   reference_unmodified_mass_5p_cca: 28421.6051
   isotype_model_note: Leu (119.9 bits) / Ser (69.8 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Leu-TAA-1-1
   amino_acid: Leu
   anticodon: UAA
@@ -328,6 +477,10 @@ trna_library:
   length: 85
   reference_unmodified_mass_5p_cca: 28370.6501
   isotype_model_note: Leu (121.8 bits) / Ser (84.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Leu-TAG-1-1
   amino_acid: Leu
   anticodon: UAG
@@ -337,6 +490,10 @@ trna_library:
   length: 85
   reference_unmodified_mass_5p_cca: 28365.5801
   isotype_model_note: Leu (117.5 bits) / Ser (76.6 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Lys-CTT-1-1
   amino_acid: Lys
   anticodon: CUU
@@ -346,6 +503,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 24852.4911
   isotype_model_note: Lys (113.6 bits) / Arg (88.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Lys-TTT-1-1
   amino_acid: Lys
   anticodon: UUU
@@ -355,6 +516,10 @@ trna_library:
   length: 77
   reference_unmodified_mass_5p_cca: 24811.923
   isotype_model_note: Lys (121.5 bits) / Ile2 (93.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Met-CAT-1-1
   amino_acid: Met
   anticodon: CAU
@@ -364,6 +529,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 24884.4911
   isotype_model_note: Met (103.6 bits) / Thr (72.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Phe-GAA-1-1
   amino_acid: Phe
   anticodon: GAA
@@ -373,6 +542,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 24312.62
   isotype_model_note: Phe (102.5 bits) / Tyr (67.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Phe-GAA-1-2
   amino_acid: Phe
   anticodon: GAA
@@ -382,6 +555,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 24312.62
   isotype_model_note: Phe (102.5 bits) / Tyr (67.3 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Pro-CGG-1-1
   amino_acid: Pro
   anticodon: CGG
@@ -391,6 +568,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 24172.46
   isotype_model_note: Pro (102.2 bits) / Gly (64.0 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Pro-GGG-1-1
   amino_acid: Pro
   anticodon: GGG
@@ -400,6 +581,10 @@ trna_library:
   length: 78
   reference_unmodified_mass_5p_cca: 25208.087
   isotype_model_note: Pro (100.4 bits) / Arg (58.8 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Pro-TGG-1-1
   amino_acid: Pro
   anticodon: UGG
@@ -409,6 +594,10 @@ trna_library:
   length: 75
   reference_unmodified_mass_5p_cca: 24197.47
   isotype_model_note: Pro (93.5 bits) / Gln (52.6 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ser-CGA-1-1
   amino_acid: Ser
   anticodon: CGA
@@ -418,6 +607,10 @@ trna_library:
   length: 80
   reference_unmodified_mass_5p_cca: 26703.5351
   isotype_model_note: Ser (84.6 bits) / Cys (50.7 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ser-GCT-1-1
   amino_acid: Ser
   anticodon: GCU
@@ -427,6 +620,10 @@ trna_library:
   length: 85
   reference_unmodified_mass_5p_cca: 28332.5451
   isotype_model_note: Ser (82.1 bits) / Cys (51.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ser-GGA-1-1
   amino_acid: Ser
   anticodon: GGA
@@ -436,6 +633,10 @@ trna_library:
   length: 83
   reference_unmodified_mass_5p_cca: 27800.2571
   isotype_model_note: Ser (103.5 bits) / Cys (71.6 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Ser-TGA-1-1
   amino_acid: Ser
   anticodon: UGA
@@ -445,6 +646,10 @@ trna_library:
   length: 85
   reference_unmodified_mass_5p_cca: 28398.7101
   isotype_model_note: Ser (90.6 bits) / Cys (49.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Thr-CGT-1-1
   amino_acid: Thr
   anticodon: CGU
@@ -454,6 +659,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24228.0431
   isotype_model_note: Thr (88.8 bits) / Arg (63.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Thr-GGT-1-1
   amino_acid: Thr
   anticodon: GGU
@@ -463,6 +672,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24291.1081
   isotype_model_note: Thr (100.0 bits) / Gly (62.2 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Thr-TGT-1-1
   amino_acid: Thr
   anticodon: UGU
@@ -472,6 +685,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 24814.4361
   isotype_model_note: Thr (108.3 bits) / Met (65.5 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Trp-CCA-1-1
   amino_acid: Trp
   anticodon: CCA
@@ -481,6 +698,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 23863.336
   isotype_model_note: Trp (112.7 bits) / Arg (73.7 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Tyr-GTA-1-1
   amino_acid: Tyr
   anticodon: GUA
@@ -490,6 +711,10 @@ trna_library:
   length: 72
   reference_unmodified_mass_5p_cca: 24289.1371
   isotype_model_note: Tyr (108.9 bits) / Phe (63.9 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Val-CAC-1-1
   amino_acid: Val
   anticodon: CAC
@@ -499,6 +724,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 23906.316
   isotype_model_note: Val (106.0 bits) / Gly (75.0 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Val-GAC-1-1
   amino_acid: Val
   anticodon: GAC
@@ -508,6 +737,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 23947.326
   isotype_model_note: Val (103.4 bits) / Gly (72.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Val-GAC-1-2
   amino_acid: Val
   anticodon: GAC
@@ -517,6 +750,10 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 23947.326
   isotype_model_note: Val (103.4 bits) / Gly (72.4 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
 - id: tRNA-Val-TAC-1-1
   amino_acid: Val
   anticodon: UAC
@@ -526,3 +763,7 @@ trna_library:
   length: 74
   reference_unmodified_mass_5p_cca: 23867.276
   isotype_model_note: Val (96.7 bits) / Gly (76.0 bits)
+  conserved_modifications:
+  - position: 15
+    modification: G+
+    note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'

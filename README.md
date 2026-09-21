@@ -6,7 +6,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 
 ## 実装状況
 
-設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 84件通過、実データでのエンドツーエンド動作確認済み）。
+設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 145件通過、実データでのエンドツーエンド動作確認済み）。
 
 `nyako0813/RNA_MassHunter`（大規模な既存リポジトリ）から移植した機能:
 
@@ -50,6 +50,19 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 - Excel出力は既存の01_Index〜08_Visualizationの枠組み（Index/ハイパーリンク/切り詰め/書式）をそのまま流用しつつ、03/06シートをNucleosideTargetベースの内容（`03_Nucleoside_Targets`, `06_Nucleoside_Comparison`）に差し替える（04/05/07は共通）。
 - **`ms1_peak_extraction.mz_min` に注意**（§24.5）: 既定値`500`はオリゴマー断片を想定した値。P1モードで検出対象となる遊離ヌクレオシドは概ね230〜370 Da（リン酸付加でも+80 Da程度）と大幅に軽いため、`mz_min`を100〜150程度まで下げないと検出漏れが起きる。`mz_min`が400以上のままP1モードを実行するとWARNINGが記録される。
 - `modified_nucleoside_mass_mono`が無い`data/modifications.yaml`エントリに備えたフォールバック（§24.2）: target_baseの遊離ヌクレオシド質量 + `mass_shift_from_unmodified`で計算する（target_basesが単一塩基でない場合はスキップし警告する）。現状の118件は全て`modified_nucleoside_mass_mono`を直接持っており（フォールバックは未使用）、フォールバック計算値との差は最大でも約0.05mDa（4桁丸め相当、系統的なズレ無し）であることをテストで確認済み。
+
+### 修飾仮説の理論質量チェック（`07b_Hypothesis_Check`）
+
+「この位置にこの修飾があるはず」という仮説の理論質量が、生のMS1ピークに実在するかを確認する機能（仕様: `claude_code/hypothesis_mass_check_spec.md`）。**観測質量から修飾を自動同定することはしない**——ユーザーが指定した仮説について一致・不一致（Yes/No）を返すだけで、不一致の場合の候補生成もしない。P1モード・オリゴマーモードのどちらでも動作する。
+
+- 仮説は2系統をマージして同じ照合ロジックにかける。
+  - `sequence.trna_type`で選んだtRNAの`data/trna_library.yaml` `conserved_modifications`（Source = `trna_library_default`）。全58件に **position 15 = G+（archaeosine）** を機械的に付与してあるが、**要生物学的最終確認**（違う場合は該当エントリだけ手で修正・削除する）。
+  - `config.yaml`の`hypothesis_check.targets`（Source = `config_manual`、既定は空）。書式は`config.yaml`のコメント参照。
+- ターゲット形式は3種: `label`（カタログのヌクレオシド質量そのまま）／`components`+`linkage`（ジヌクレオチド。5'/3'は区別しない）／`base`+`add_elements`（カタログ質量+元素の単同位体質量）。ジヌクレオチドは N1 + N2 + HPO3 − H2O（`phosphorothioate`はさらに +S −O）で、本体RNA_MassHunterの`p1_sap_dinucleotide_candidates.py`と同じ元素組成モデル。
+- 各chargeを1〜`max_charge`と仮定して観測中性質量を逆算し、理論質量から`mass_tolerance_ppm`以内のピークを全て収集する。1仮説に複数ピークが一致すれば複数行に展開、一致無しは`Match_Found = No`の1行。Peak IDは04/05/06シートと共通。
+- 理論質量は遊離ヌクレオシド基準（リン酸付加は考慮しない）。AP無し（5'-リン酸残存）のデータでは`add_elements`等で補正するか、P1+AP前提の仮説として解釈すること。
+- 仮説が1件も無い、または`hypothesis_check.enabled: false`の場合はシートを作らない（既存の出力は変わらない）。未知のlabel・不正なtargetsは起動時に`ValueError`（`trna_library`側の不明labelはERROR警告でスキップ）。
+- 実データ検証（`05_Mix.mzML`、P1+AP、positive）: m2,2G-PT-U（633.1254 Da）が PK72358〜PK72360（charge 1、Δppm −1.48〜−0.56）で一致。m2,2G-PT-C（632.1414）は最近傍が約26 ppm離れており、15 ppm許容では不一致。cnm5s2U+O+S / +S / ncm5s2Uは不一致（標準品ミックスとして妥当）。この結果は`tests/test_hypothesis_check.py`に統合テストとして組み込んである（`data/input/05_Mix.mzML`が無い環境ではskip）。
 
 ## 実データでの検証結果（Phase 8）
 

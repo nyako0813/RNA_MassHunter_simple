@@ -108,6 +108,29 @@ mass_comparison:
   # nucleoside masses instead of the wide max_delta_da search.
   nucleoside_mz_tolerance_ppm: 10
 
+# 修飾仮説の理論質量チェック (claude_code/hypothesis_mass_check_spec.md)。
+# 「この仮説の理論質量は生ピークに存在するか」を Yes/No で確認するだけで、
+# 観測質量からの自動同定はしない。結果は Excel の 07b_Hypothesis_Check シート。
+# 仮説は次の2つをマージして照合する:
+#   - sequence.trna_type で選んだtRNAの data/trna_library.yaml
+#     conserved_modifications（既定: position 15 = G+ / archaeosine、要生物学的最終確認）
+#   - 下の targets（今回だけ追加したい代替仮説）
+# 仮説が1件も無ければシートは作られない。
+hypothesis_check:
+  enabled: true
+  mass_tolerance_ppm: 15
+  max_charge: 4
+  targets: []
+  # targets の書き方（name は任意。label / components / base のどれか1つ）:
+  #   - name: "G15 = unmodified G"            # カタログの label を直接指定
+  #     label: "G"
+  #   - name: "m2,2G-PT-U dinucleotide"       # ジヌクレオチド（5'/3'は区別しない）
+  #     components: ["m2,2G", "U"]
+  #     linkage: "phosphorothioate"           # または "phosphodiester"（省略時）
+  #   - name: "cnm5s2U+O+S"                   # 塩基 + 元素付加
+  #     base: "cnm5s2U"
+  #     add_elements: {O: 1, S: 1}
+
 reporting:
   excel_output: true
   output_filename: "RNA_MassHunter_simple_report.xlsx"

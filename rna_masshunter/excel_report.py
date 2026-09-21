@@ -37,6 +37,7 @@ from typing import Any
 import pandas as pd
 from openpyxl.utils import get_column_letter
 
+from rna_masshunter.hypothesis_check import HypothesisCheckRow
 from rna_masshunter.mass_comparison import MassComparisonRow, has_any_candidate
 from rna_masshunter.models import Fragment, Modification, Peak, RunConfig
 from rna_masshunter.nucleoside_comparison import NucleosideComparisonRow
@@ -171,6 +172,7 @@ SHEET_DESCRIPTIONS = {
     "05_Mass_Intensity": "Same as 04_Observed_Mass with Intensity as an explicit column.",
     "06_Mass_Comparison": "Fragment x charge x Peak matches: mass differences plus independent Formula/Modification Candidate columns.",
     "07_Modifications": "Known RNA modification database (data/modifications.yaml) used for Modification Candidate search.",
+    "07b_Hypothesis_Check": "Modification-hypothesis presence check: each hypothesis' theoretical mass (tRNA library defaults + config.hypothesis_check.targets) vs the raw peaks. Yes/No only — no automatic identification.",
     "08_Visualization": "Scatter chart: Charge (x) vs ΔDa (y), sourced from 06_Mass_Comparison and colored by whether a Formula/Modification candidate was found.",
     # §24 (Phase 10) P1 complete-digestion mode: 03/06 are repurposed (see
     # write_nucleoside_mass_hunter_report), 04/05/07 are unchanged (peaks
@@ -334,6 +336,37 @@ def _nucleoside_comparison_frame(rows: list[NucleosideComparisonRow]) -> pd.Data
         for row in rows
     ]
     return pd.DataFrame(data, columns=_NUCLEOSIDE_COMPARISON_COLUMNS)
+
+
+_HYPOTHESIS_CHECK_COLUMNS = [
+    "Hypothesis_Name", "Source", "Formula_Description", "Theoretical_Mass", "Match_Found",
+    "Matched_Peak_IDs", "Charge", "Observed_Mass", "ΔDa", "Δppm", "Intensity", "RT_Range",
+]
+
+
+def _hypothesis_rt_range(row: HypothesisCheckRow) -> str:
+    """Merged peaks (§14C) show their RT span; an ordinary peak shows its
+    single RT — for a hypothesis check the elution time is useful even when
+    no merging happened (unlike the other sheets' RT Range column)."""
+    if row.scan_count > 1 and row.rt_range is not None:
+        return _format_rt_range(row.scan_count, row.rt_range)
+    return "" if row.rt is None else f"{row.rt:.3f}"
+
+
+def _hypothesis_check_frame(rows: list[HypothesisCheckRow]) -> pd.DataFrame:
+    """hypothesis_mass_check_spec.md §6: one row per matching (peak, charge);
+    a hypothesis with no match gets a single Match_Found=No row."""
+    data = [
+        {
+            "Hypothesis_Name": row.hypothesis_name, "Source": row.source,
+            "Formula_Description": row.formula_description, "Theoretical_Mass": row.theoretical_mass,
+            "Match_Found": "Yes" if row.match_found else "No", "Matched_Peak_IDs": row.peak_id or "",
+            "Charge": row.charge, "Observed_Mass": row.observed_mass, "ΔDa": row.delta_da,
+            "Δppm": row.delta_ppm, "Intensity": row.intensity, "RT_Range": _hypothesis_rt_range(row),
+        }
+        for row in rows
+    ]
+    return pd.DataFrame(data, columns=_HYPOTHESIS_CHECK_COLUMNS)
 
 
 def _input_frame(config: RunConfig, warnings: list[dict[str, Any]]) -> pd.DataFrame:
@@ -528,6 +561,7 @@ def write_simple_mass_hunter_report(
     mass_comparison_rows: list[MassComparisonRow],
     modifications: list[Modification],
     warnings: list[dict[str, Any]] | None = None,
+    hypothesis_rows: list[HypothesisCheckRow] | None = None,
 ) -> Path:
     """仕様書 §16: 01_Index〜08_Visualization を出力する。既存の
     _add_index_and_backlinks/_autosize_and_freeze のIndex/ハイパーリンク/
@@ -550,6 +584,8 @@ def write_simple_mass_hunter_report(
         "06_Mass_Comparison": _mass_comparison_frame(mass_comparison_rows),
         "07_Modifications": _modifications_frame(modifications),
     }
+    if hypothesis_rows is not None:
+        sheets["07b_Hypothesis_Check"] = _hypothesis_check_frame(hypothesis_rows)
     sheets = {name: _truncate_frame_if_needed(name, frame, max_rows, truncate_large_sheets, warnings) for name, frame in sheets.items()}
     # Cells may hold None / dict (e.g. Detectability) — normalize them so
     # openpyxl never chokes on an unsupported type (仕様書 §18 error handling
@@ -575,6 +611,12 @@ def write_simple_mass_hunter_report(
             "ΔDa": "+0.00000;-0.00000", "Δppm": "0.0",
         })
 
+        if "07b_Hypothesis_Check" in sheets:
+            _apply_number_formats(writer.sheets["07b_Hypothesis_Check"], sheets["07b_Hypothesis_Check"], {
+                "Theoretical_Mass": "0.0000", "Observed_Mass": "0.0000",
+                "ΔDa": "+0.00000;-0.00000", "Δppm": "0.0",
+            })
+
         _autosize_and_freeze(writer, index_sheet_name="01_Index")
 
     return output_path
@@ -589,6 +631,7 @@ def write_nucleoside_mass_hunter_report(
     modifications: list[Modification],
     base_masses: dict[str, Any],
     warnings: list[dict[str, Any]] | None = None,
+    hypothesis_rows: list[HypothesisCheckRow] | None = None,
 ) -> Path:
     """§24 (Phase 10): Nuclease P1完全分解モード用のExcel出力。
     write_simple_mass_hunter_report と同じ01_Index〜08_Visualizationの
@@ -615,6 +658,8 @@ def write_nucleoside_mass_hunter_report(
         "06_Nucleoside_Comparison": _nucleoside_comparison_frame(nucleoside_comparison_rows),
         "07_Modifications": _modifications_frame(modifications),
     }
+    if hypothesis_rows is not None:
+        sheets["07b_Hypothesis_Check"] = _hypothesis_check_frame(hypothesis_rows)
     sheets = {name: _truncate_frame_if_needed(name, frame, max_rows, truncate_large_sheets, warnings) for name, frame in sheets.items()}
     sheets = {name: frame.map(_excel_safe_cell) if not frame.empty else frame for name, frame in sheets.items()}
 
@@ -635,6 +680,12 @@ def write_nucleoside_mass_hunter_report(
             "Observed Mass": "0.000", "Theoretical Mass": "0.000",
             "ΔDa": "+0.00000;-0.00000", "Δppm": "0.0",
         })
+
+        if "07b_Hypothesis_Check" in sheets:
+            _apply_number_formats(writer.sheets["07b_Hypothesis_Check"], sheets["07b_Hypothesis_Check"], {
+                "Theoretical_Mass": "0.0000", "Observed_Mass": "0.0000",
+                "ΔDa": "+0.00000;-0.00000", "Δppm": "0.0",
+            })
 
         _autosize_and_freeze(writer, index_sheet_name="01_Index")
 
