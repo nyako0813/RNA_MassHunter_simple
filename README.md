@@ -6,7 +6,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 
 ## 実装状況
 
-設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 165件通過、実データでのエンドツーエンド動作確認済み）。
+設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 166件通過、実データでのエンドツーエンド動作確認済み）。
 
 `nyako0813/RNA_MassHunter`（大規模な既存リポジトリ）から移植した機能:
 
@@ -59,9 +59,9 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
   - `sequence.trna_type`で選んだtRNAの`data/trna_library.yaml` `conserved_modifications`（Source = `trna_library_default`）。各エントリは`position`（配列自身の通し番号）・`modification`（単一ラベル）または`modification_candidates`（ラベルのリスト。各候補が独立した仮説に展開される）・`confidence`・`note`を持つ。`Confidence`列（`07b`）にそのまま出る。
     - `confirmed`: この生物種・株で直接検出済み。現状は **C+（agmatidine）を`tRNA-Ile2-CAT-1-1`のwobble位置に**（*M. acetivorans* C2A Δhpt株のtRNAでLC-MS確認、Gregorova et al. 2020, RNA Biol, [DOI:10.1080/15476286.2020.1853385](https://doi.org/10.1080/15476286.2020.1853385)）のみ。
     - `high_probability`: 一般則に基づく推定で、個々のtRNAでの直接確認ではない。全58件の **position 15 = G+（archaeosine）**（全長リコンストラクトでarchaeosine欠損が疑われるピークがあり、100%存在するとは言えない）と、下記の位置・塩基ルール由来の候補。
-    - 位置・塩基ルール（標準tRNA番号から配列内位置を推定: 34 = `wobble_position`、37 = wobble+3、55 / 58 = discriminator（標準73）から逆算。塩基が一致する場合のみ追加）: U55 → Y（47件、`universal_U55_pseudouridine`。ΨはUと同質量なので質量だけではUと区別できない）／wobble U34 → cnm5U等10候補（14件、`ma_U34_main_target`）／A37 → t6A系4候補（34件、`ma_A37_t6A`）／A58 → m1A・m6A（47件、`archaea_A58_methylation`。汎用ラベル`methylation`は質量を持たずm1A/m6Aと同質量なので除外）／`tRNA-Phe-GAA-1-1/1-2`のG37 → imG-14・imG・imG2（ワイオシン経路。実データ`05_Mix`でも321.11 / 335.12 Daが複数ピーク検出）。imG-14をPhe以外に付けていないのはtRNA割り当てが未確認のため。
+    - 位置・塩基ルール（標準tRNA番号から配列内位置を推定: 34 = `wobble_position`、37 = wobble+3、55 / 58 = discriminator（標準73）から逆算。塩基が一致する場合のみ追加）: U55 → Y（47件、`universal_U55_pseudouridine`。ΨはUと同質量なので質量だけではUと区別できない）／wobble U34 → cnm5U等10候補（15件、`ma_U34_main_target`）／A37 → t6A系4候補（35件、`ma_A37_t6A`）／A58 → m1A・m6A（47件、`archaea_A58_methylation`。汎用ラベル`methylation`は質量を持たずm1A/m6Aと同質量なので除外）／`tRNA-Phe-GAA-1-1/1-2`のG37 → imG-14・imG・imG2（ワイオシン経路。実データ`05_Mix`でも321.11 / 335.12 Daが複数ピーク検出）。imG-14をPhe以外に付けていないのはtRNA割り当てが未確認のため。
     - これらは`tools/add_conserved_modifications.py`で再生成できる（冪等、`--check`で差分確認）。手で直す場合はスクリプト側を直すこと（`tests/test_hypothesis_check.py`が生成結果とYAMLの一致を検査する）。
-    - **既知の要確認事項**: `tRNA-Ala-TGC-1-1`は`wobble_position: 37`だが、配列の37〜39番目は`AAG`でアンチコドン`UGC`と一致しない（`UGC`は配列の34〜36番目）。データ自体は未変更。このため位置ルール由来の候補が付かない。
+    - 過去の不整合の修正: `tRNA-Ala-TGC-1-1`の`wobble_position`が`37`と誤っていた（アンチコドン`UGC`は配列の34〜36番目）ため`34`に修正済み。これにより、このエントリにもU34系10候補・A37系4候補が付く。他の57件は`wobble_position`と配列上のアンチコドンが一致している。
   - `config.yaml`の`hypothesis_check.targets`（Source = `config_manual`、既定は空）。書式は`config.yaml`のコメント参照。
 - ターゲット形式は3種: `label`（カタログのヌクレオシド質量そのまま）／`components`+`linkage`（ジヌクレオチド。5'/3'は区別しない）／`base`+`add_elements`（カタログ質量+元素の単同位体質量）。ジヌクレオチドは N1 + N2 + HPO3 − H2O（`phosphorothioate`はさらに +S −O）で、本体RNA_MassHunterの`p1_sap_dinucleotide_candidates.py`と同じ元素組成モデル。
 - 各chargeを1〜`max_charge`と仮定して観測中性質量を逆算し、理論質量から`mass_tolerance_ppm`以内のピークを全て収集する。1仮説に複数ピークが一致すれば複数行に展開、一致無しは`Match_Found = No`の1行。Peak IDは04/05/06シートと共通。

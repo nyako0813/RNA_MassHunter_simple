@@ -22,9 +22,9 @@
 # and C+ (Ile2 wobble) entries are hand-curated inputs to that script; the
 # modification_candidates entries are rebuilt from base/position rules.
 #
-# 既知の要確認事項: tRNA-Ala-TGC-1-1 は wobble_position=37 だが、配列の37-39番目は
-# AAG でアンチコドン(UGC)と一致しない（UGC は配列の34-36番目）。データ自体は
-# 未変更。この不整合のため、このエントリには位置ルール由来の候補が付かない。
+# 修正履歴: tRNA-Ala-TGC-1-1 の wobble_position は 37 と誤っていたため 34 に修正した
+# （アンチコドン UGC は配列の34-36番目。レビュー中に発見された既存データの不整合）。
+# 他の57件は wobble_position と配列上のアンチコドンが一致することを確認済み。
 trna_library:
 - id: tRNA-Ala-CGC-1-1
   amino_acid: Ala
@@ -74,7 +74,7 @@ trna_library:
   amino_acid: Ala
   anticodon: UGC
   anticodon_gene_notation: TGC
-  wobble_position: 37
+  wobble_position: 34
   sequence: GGGCUUGUAGAUCAGCUGGAAGAUCGCUGCCUUUGCAAGGCAGAGGCCCUGGGUUCGAGUCCCAGCAAGUCCA
   length: 73
   reference_unmodified_mass_5p_cca: 23632.197
@@ -84,6 +84,28 @@ trna_library:
     modification: G+
     confidence: high_probability
     note: position 15 is G in nearly all elongator tRNAs; archaeosine is the default hypothesis but not guaranteed (observed mass loss in intact-tRNA MS suggests occasional absence)
+  - position: 34
+    modification_candidates:
+    - cnm5U
+    - cmnm5U
+    - mnm5U
+    - mnm5s2U
+    - s2U
+    - s4U
+    - mcm5U
+    - mcm5s2U
+    - ncm5U
+    - ncm5Um
+    confidence: high_probability
+    note: standard position 34 (wobble); base is U; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_U34_main_target.
+  - position: 37
+    modification_candidates:
+    - t6A
+    - ms2t6A
+    - hn6A
+    - ms2hn6A
+    confidence: high_probability
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
 - id: tRNA-Arg-CCG-1-1
   amino_acid: Arg
   anticodon: CCG

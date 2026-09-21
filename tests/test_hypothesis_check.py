@@ -143,9 +143,20 @@ def test_canonical_positions_reproduce_spec_validation(library_entries):
     assert sum(gen.base_at(e, gen.canonical_positions(e)[55]) == "U" for e in library_entries) == 47
 
 
-def test_wobble_position_matches_anticodon_except_known_ala_tgc_inconsistency(library_entries):
+def test_wobble_position_matches_the_anticodon_in_every_entry(library_entries):
     mismatched = [e["id"] for e in library_entries if e["sequence"][e["wobble_position"] - 1:][:3] != e["anticodon"]]
-    assert mismatched == ["tRNA-Ala-TGC-1-1"]  # known issue, data deliberately left unchanged (README)
+    assert mismatched == []  # tRNA-Ala-TGC-1-1 was 37 (wrong) before ala_tgc_wobble_position_fix.md; now 34
+
+
+def test_ala_tgc_wobble_fix_gives_it_the_u34_and_a37_rule_entries(library_entries):
+    ala = next(e for e in library_entries if e["id"] == "tRNA-Ala-TGC-1-1")
+    assert ala["wobble_position"] == 34
+    assert ala["sequence"][33:36] == "UGC" == ala["anticodon"]
+    rule_items = [(m["position"], m["modification_candidates"], m["confidence"]) for m in _candidate_entries(ala)]
+    assert rule_items == [
+        (34, ["cnm5U", "cmnm5U", "mnm5U", "mnm5s2U", "s2U", "s4U", "mcm5U", "mcm5s2U", "ncm5U", "ncm5Um"], "high_probability"),
+        (37, ["t6A", "ms2t6A", "hn6A", "ms2hn6A"], "high_probability"),
+    ]  # no U55 / A58: those count back from the discriminator, and this tRNA's T-loop bases are G55 / U58
 
 
 def _candidate_entries(entry):
@@ -154,8 +165,8 @@ def _candidate_entries(entry):
 
 @pytest.mark.parametrize("first_candidate, expected_count", [
     ("Y", 47),        # U55            universal_U55_pseudouridine
-    ("cnm5U", 14),    # wobble U34     ma_U34_main_target
-    ("t6A", 34),      # A37            ma_A37_t6A
+    ("cnm5U", 15),    # wobble U34     ma_U34_main_target (14 + tRNA-Ala-TGC-1-1 after its wobble_position fix)
+    ("t6A", 35),      # A37            ma_A37_t6A         (34 + tRNA-Ala-TGC-1-1)
     ("m1A", 47),      # A58            archaea_A58_methylation
     ("imG-14", 2),    # tRNA-Phe G37
 ])
@@ -189,11 +200,9 @@ def test_no_rule_entries_where_the_base_does_not_match(library_entries):
             base = gen.base_at(entry, item["position"])
             first = item["modification_candidates"][0]
             assert base == {"Y": "U", "cnm5U": "U", "t6A": "A", "m1A": "A", "imG-14": "G"}[first], entry["id"]
-    # wobble C (Ile2) gets no U34 rule; Ala-TGC (inconsistent wobble_position) gets no rule entries at all.
+    # wobble C (Ile2) gets no U34 rule.
     ile2 = next(e for e in library_entries if e["id"] == ILE2_ID)
     assert not any(m["modification_candidates"][0] == "cnm5U" for m in _candidate_entries(ile2))
-    ala_tgc = next(e for e in library_entries if e["id"] == "tRNA-Ala-TGC-1-1")
-    assert _candidate_entries(ala_tgc) == []
 
 
 def test_confidence_tiers_of_curated_entries(library_entries):
