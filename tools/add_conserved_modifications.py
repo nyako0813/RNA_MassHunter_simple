@@ -35,8 +35,10 @@ ARCHAEOSINE_NOTE = (
     "(observed mass loss in intact-tRNA MS suggests occasional absence)"
 )
 
-# (standard position, required base, candidates, note, only_for_ids). Rules whose candidate
-# sets come from the main RNA_MassHunter repository's rule_sets/ are named in the note.
+# position/base/candidates/note per rule. Rules whose candidate sets come from the main
+# RNA_MassHunter repository's rule_sets/ are named in the note. `note_extra` optionally
+# appends a sentence to the note, only for tRNAs whose anticodon 3rd base (standard
+# position 36) equals `when_anticodon_3rd_base` — a claim that is only true for those.
 # "methylation" (generic class, no defined mass) from archaea_A58_methylation is
 # deliberately omitted: m1A / m6A already cover the same +CH2 mass.
 RULES: list[dict[str, Any]] = [
@@ -55,8 +57,11 @@ RULES: list[dict[str, Any]] = [
     {
         "position": 37, "base": "A", "candidates": ["t6A", "ms2t6A", "hn6A", "ms2hn6A"],
         "note": "standard position 37 (wobble + 3); base is A; candidate set from "
-                "rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon "
-                "3rd base = U correlation (all 16 such tRNAs have A37).",
+                "rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.",
+        "note_extra": {
+            "when_anticodon_3rd_base": "U",
+            "text": "Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).",
+        },
     },
     {
         "position": 58, "base": "A", "candidates": ["m1A", "m6A"],
@@ -106,11 +111,15 @@ def rule_entries(entry: dict[str, Any]) -> list[dict[str, Any]]:
         position = positions[rule["position"]]
         if base_at(entry, position) != rule["base"]:
             continue
+        note = rule["note"]
+        extra = rule.get("note_extra")
+        if extra and entry["anticodon"][2] == extra["when_anticodon_3rd_base"]:
+            note = f"{note} {extra['text']}"
         found.append({
             "position": position,
             "modification_candidates": list(rule["candidates"]),
             "confidence": HIGH_PROBABILITY,
-            "note": rule["note"],
+            "note": note,
         })
     return found
 

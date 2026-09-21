@@ -47,7 +47,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
 - id: tRNA-Ala-GGC-1-1
   amino_acid: Ala
   anticodon: GGC
@@ -69,7 +69,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
 - id: tRNA-Ala-TGC-1-1
   amino_acid: Ala
   anticodon: UGC
@@ -105,7 +105,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
 - id: tRNA-Arg-CCG-1-1
   amino_acid: Arg
   anticodon: CCG
@@ -224,7 +224,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 56
     modification_candidates:
     - Y
@@ -445,7 +445,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 54
     modification_candidates:
     - Y
@@ -581,7 +581,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 57
     modification_candidates:
     - Y
@@ -692,7 +692,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 54
     modification_candidates:
     - Y
@@ -725,7 +725,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 54
     modification_candidates:
     - Y
@@ -758,7 +758,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 54
     modification_candidates:
     - Y
@@ -791,7 +791,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 54
     modification_candidates:
     - Y
@@ -838,7 +838,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 54
     modification_candidates:
     - Y
@@ -1079,7 +1079,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 67
     modification_candidates:
     - Y
@@ -1484,7 +1484,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 62
     modification_candidates:
     - Y
@@ -1550,7 +1550,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 65
     modification_candidates:
     - Y
@@ -1597,7 +1597,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
   - position: 67
     modification_candidates:
     - Y
@@ -1782,7 +1782,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
 - id: tRNA-Val-GAC-1-1
   amino_acid: Val
   anticodon: GAC
@@ -1804,7 +1804,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
 - id: tRNA-Val-GAC-1-2
   amino_acid: Val
   anticodon: GAC
@@ -1826,7 +1826,7 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.
 - id: tRNA-Val-TAC-1-1
   amino_acid: Val
   anticodon: UAC
@@ -1862,4 +1862,4 @@ trna_library:
     - hn6A
     - ms2hn6A
     confidence: high_probability
-    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A. Consistent with the anticodon 3rd base = U correlation (all 16 such tRNAs have A37).
+    note: standard position 37 (wobble + 3); base is A; candidate set from rule_sets/methanosarcina_acetivorans.yaml ma_A37_t6A.

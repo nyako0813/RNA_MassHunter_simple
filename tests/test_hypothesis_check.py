@@ -205,6 +205,25 @@ def test_no_rule_entries_where_the_base_does_not_match(library_entries):
     assert not any(m["modification_candidates"][0] == "cnm5U" for m in _candidate_entries(ile2))
 
 
+def test_a37_note_claims_the_anticodon_u_correlation_only_for_anticodon_3rd_base_u(library_entries):
+    claim = "anticodon 3rd base = U correlation"
+    with_claim = without_claim = 0
+    for entry in library_entries:
+        for item in _candidate_entries(entry):
+            if item["modification_candidates"][0] != "t6A":
+                continue
+            assert ("ma_A37_t6A" in item["note"])
+            if entry["anticodon"][2] == "U":
+                assert claim in item["note"], entry["id"]
+                with_claim += 1
+            else:
+                assert claim not in item["note"], entry["id"]
+                without_claim += 1
+    assert (with_claim, without_claim) == (16, 19)  # 16 anticodon-U tRNAs (all have A37) + 19 other A37 tRNAs
+    ala = next(e for e in library_entries if e["id"] == "tRNA-Ala-TGC-1-1")
+    assert ala["anticodon"][2] == "C"
+
+
 def test_confidence_tiers_of_curated_entries(library_entries):
     for entry in library_entries:
         for item in entry["conserved_modifications"]:

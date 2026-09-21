@@ -6,7 +6,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 
 ## 実装状況
 
-設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 166件通過、実データでのエンドツーエンド動作確認済み）。
+設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 167件通過、実データでのエンドツーエンド動作確認済み）。
 
 `nyako0813/RNA_MassHunter`（大規模な既存リポジトリ）から移植した機能:
 
