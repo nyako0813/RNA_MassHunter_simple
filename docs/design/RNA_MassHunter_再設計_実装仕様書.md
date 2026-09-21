@@ -336,7 +336,7 @@ ms2_annotation:
 | `rna_masshunter/observed_mass.py` | MS1ピークからObserved_Mass/Mass_Intensityシート用の行データ（Peak IDの安定採番含む）を生成する薄いヘルパー |
 | `rna_masshunter/ms2_support.py`（2026-09-02追記） | MS2スペクトルを前駆体(fragment×charge)に紐付け、理論d/w/a/zイオンとの一致件数・一覧を返す薄いヘルパー（§8.5） |
 | `rna_masshunter/simple_pipeline.py` | 新設計フローのオーケストレーション本体（config読込→CCA→消化→AP→MS1ピーク抽出→MS2スペクトル抽出→Mass Comparison→Excel出力） |
-| `simple_main.py`（リポジトリ直下） | CLIエントリポイント（`main.py` とは独立。`argparse` で `--config` を受け取り `simple_pipeline.run()` を呼ぶだけの薄いラッパー） |
+| `main.py`（リポジトリ直下。当初は`simple_main.py`の名称で、後に`main.py`へ改名） | CLIエントリポイント（本体RNA_MassHunterの`main.py` とは独立。`argparse` で `--config` を受け取り `simple_pipeline.run()` を呼ぶだけの薄いラッパー） |
 | `test_formula_candidate.py` | `formula_candidate.py` の単体テスト |
 | `test_mass_comparison.py` | `mass_comparison.py` の単体テスト |
 | `test_ms2_support.py`（2026-09-02追記） | `ms2_support.py` の単体テスト |
@@ -639,7 +639,7 @@ def run(config_path: str | Path) -> dict:
     """
 ```
 
-`simple_main.py`（リポジトリ直下）はこの `run()` を呼ぶだけの数行のCLIラッパーとする（`argparse` で `--config` のみ受け取る、既存 `main.py` の `parse_args`/`resolve_config_path` パターンを踏襲してよい）。
+`main.py`（リポジトリ直下。当初の名称は`simple_main.py`）はこの `run()` を呼ぶだけの数行のCLIラッパーとする（`argparse` で `--config` のみ受け取る、既存 `main.py` の `parse_args`/`resolve_config_path` パターンを踏襲してよい）。
 
 ### 8.5 `rna_masshunter/ms2_support.py`（2026-09-02追記）
 
@@ -1153,7 +1153,7 @@ def test_ms2_disabled_short_circuits(synthetic_fragments, synthetic_ms2_spectra,
 
 コードでは自動化できない、人手での最終確認手順:
 
-1. ユーザーの実際のmzMLファイルと、実際に使っている `config.yaml`（相当）を用意し、`simple_main.py --config <path>` を実行。
+1. ユーザーの実際のmzMLファイルと、実際に使っている `config.yaml`（相当）を用意し、`main.py --config <path>`（当初の名称は`simple_main.py`）を実行。
 2. 生成されたExcelを開き、`01_Index` の全リンクが正しく遷移すること、各シートの「← Back to Index」リンクが機能することを目視確認。
 3. `06_Mass_Comparison` で、ユーザーが既に知っている（wet lab等で確認済みの）修飾を含む断片について、`Known Modification` 列が期待通りの修飾名を返しているかを確認。
 4. 同じ行の `Formula Candidates` 列が、その既知修飾の元素組成差分と整合するか（例: メチル化なら `CH2` が候補に含まれるか）を確認。
@@ -1166,7 +1166,7 @@ def test_ms2_disabled_short_circuits(synthetic_fragments, synthetic_ms2_spectra,
 
 ## 22. 実装順序
 
-既存の巨大な `main.py` の `main()` は分岐が複雑に絡み合っており部分抽出が困難なため、**新設計は独立した新規オーケストレーション層（`simple_pipeline.py` + `simple_main.py`）として実装し、`main.py` 自体には一切手を入れない**方針を確定する（既存パイプラインとの並行運用・段階的検証がしやすく、既存の巨大な回帰リスクを避けられるため）。
+既存の巨大な `main.py` の `main()` は分岐が複雑に絡み合っており部分抽出が困難なため、**新設計は独立した新規オーケストレーション層（`simple_pipeline.py` + エントリスクリプト。当初の名称は`simple_main.py`で、後に本リポジトリの`main.py`へ改名）として実装し、本体RNA_MassHunterの`main.py` 自体には一切手を入れない**方針を確定する（既存パイプラインとの並行運用・段階的検証がしやすく、既存の巨大な回帰リスクを避けられるため）。
 
 | フェーズ | 内容 | 完了条件 |
 |---|---|---|
@@ -1175,7 +1175,7 @@ def test_ms2_disabled_short_circuits(synthetic_fragments, synthetic_ms2_spectra,
 | 2 | `mass_comparison.py` 実装（`observed_mass.py` のPeak ID採番含む、MS1のみで完結する版） | `test_mass_comparison.py` 全通過 |
 | 2.5（2026-09-02追記） | `ms2_support.py` 実装（`build_ms2_ion_index`, `find_ms2_support`）、`mass_comparison.py` に `ms2_spectrum_id`/`ms2_matched_ion_count`/`ms2_matched_ions` 列を追加 | `test_ms2_support.py` 全通過、既存 `test_mass_comparison.py` が回帰しないこと（MS2未指定時は空欄のまま） |
 | 3 | CCA処理の配線（`cca_processing.process_cca_tail` を `simple_pipeline.py` から呼び出す） | 単体で処理結果を確認 |
-| 4 | `simple_pipeline.py` / `simple_main.py` 実装（既存の消化・MS1ピーク抽出・MS2スペクトル抽出・修飾検索を接続） | configのみでドライラン成功（mzMLなしでも警告付きで完走） |
+| 4 | `simple_pipeline.py` / `main.py`（旧`simple_main.py`）実装（既存の消化・MS1ピーク抽出・MS2スペクトル抽出・修飾検索を接続） | configのみでドライラン成功（mzMLなしでも警告付きで完走） |
 | 5 | `excel_report.py` に `write_simple_mass_hunter_report()` を追加（01〜07シート、MS2列含む。08は次フェーズ） | 生成Excelを目視確認、Index/リンクが機能、MS2列が正しく埋まる |
 | 6 | `08_Visualization`（散布図）を追加 | チャートが正しく表示される、失敗時もExcel全体は出力される |
 | 7 | `test_simple_pipeline.py`（統合テスト、MS2ありなし両ケース） | 合成データでエンドツーエンド成功 |

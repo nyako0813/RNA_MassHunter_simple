@@ -13,7 +13,7 @@ input:
 sequence:
   name: "target_tRNA^Gln2h"
   type: "RNA"
-  # Set to a data/trna_library.yaml id (see `python simple_main.py --list-trna`)
+  # Set to a data/trna_library.yaml id (see `python main.py --list-trna`)
   # to auto-fill sequence/anticodon/wobble_position below instead of pasting
   # them manually.
   trna_type: ""

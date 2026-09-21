@@ -1,7 +1,9 @@
 """CLI entrypoint for the simple RNA_MassHunter pipeline.
 
-New file (仕様書 §6, §8.4). Independent of the original repository's
-main.py — a thin argparse wrapper around `rna_masshunter.simple_pipeline.run()`.
+New file (仕様書 §6, §8.4), originally named `simple_main.py` and renamed to
+`main.py` so the entry script is invoked the same way as in the other
+projects. Independent of the main RNA_MassHunter repository's much larger
+`main.py` — a thin argparse wrapper around `rna_masshunter.simple_pipeline.run()`.
 """
 from __future__ import annotations
 
@@ -13,19 +15,17 @@ from rna_masshunter import simple_pipeline
 from rna_masshunter.trna_library import load_trna_library
 
 REPO_ROOT = Path(__file__).resolve().parent
+DEFAULT_CONFIG_PATH = REPO_ROOT / "config.yaml"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="RNA_MassHunter simple pipeline")
-    parser.add_argument("--config", help="Path to config.yaml")
+    parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH), help="Path to config.yaml (default: config.yaml in the repository root)")
     parser.add_argument(
         "--list-trna", action="store_true",
         help="List available tRNA types from data/trna_library.yaml and exit.",
     )
-    args = parser.parse_args(argv)
-    if not args.list_trna and not args.config:
-        parser.error("--config is required unless --list-trna is given")
-    return args
+    return parser.parse_args(argv)
 
 
 def _list_trna(root: Path = REPO_ROOT) -> int:

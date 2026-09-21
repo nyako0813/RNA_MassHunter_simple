@@ -33,7 +33,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
   - `merge_adjacent_profile_points()`: mzMLがcentroid化されていないprofile modeの場合に、同一scan内でppm近接する分裂点をintensity最大の点に統合する。
   - `merge_peaks_across_scans()`: 同一イオンがLC溶出中に複数の連続scanにまたがって検出される場合（`merge_max_scan_gap`以内のscan順位差）に、1行へ統合する。統合による情報欠落を避けるため`Peak.scan_count`/`Peak.rt_range`に集約情報を保持する。
   - いずれも`config.ms1_peak_extraction`の`merge_profile_points`/`merge_across_scans`で個別に有効・無効を切り替え可能（既定は両方true）。
-- `rna_masshunter/simple_pipeline.py`, `simple_main.py`: 全体オーケストレーション（`main.py` は変更していない、独立した新規エントリポイント）。ピーク抽出直後・Mass Comparisonより前に上記の統合処理を適用する。
+- `rna_masshunter/simple_pipeline.py`, `main.py`: 全体オーケストレーション（`main.py`は旧名`simple_main.py`から改名した、本体RNA_MassHunterの`main.py`とは独立した新規エントリポイント）。ピーク抽出直後・Mass Comparisonより前に上記の統合処理を適用する。
 - `rna_masshunter/excel_report.py`: 01_Index〜08_Visualizationのシート出力（元リポジトリの同名だが無関係な `excel_report.py` とは別物）。
   - 04_Observed_Mass/05_Mass_Intensity/06_Mass_Comparisonに「Scan Count」「RT Range」列（§14Cの統合情報）。
   - 08_Visualizationは06_Mass_Comparisonを情報源とするCharge×ΔDaの散布図で、Formula/Modification候補の有無で2系列に色分けする。
@@ -71,7 +71,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 
 ## 実データでの検証結果（Phase 8）
 
-ユーザーの実mzML（tRNA-Gln2、profile-mode、2,167 MS1スペクトル、MS2スペクトルなし）で`simple_main.py --config config.yaml`を実行し、以下を確認済み:
+ユーザーの実mzML（tRNA-Gln2、profile-mode、2,167 MS1スペクトル、MS2スペクトルなし）で`main.py --config config.yaml`を実行し、以下を確認済み:
 
 - 実行時間: 約1分17秒
 - profile-mode分裂点の統合（§14B）でMS1ピーク数 75,686 → 18,738件（-75%）
@@ -94,7 +94,11 @@ pytest
 `config.yaml` を編集して `sequence.sequence` と `input.mzml_path` を設定してから実行する。
 
 ```bash
-python simple_main.py --config config.yaml
+python main.py                      # リポジトリ直下の config.yaml を使う
+python main.py --config config.yaml # 設定ファイルを明示する場合
+python main.py --list-trna          # data/trna_library.yaml の tRNA 種類一覧
 ```
+
+（エントリスクリプトは旧名 `simple_main.py`。`main.py` に改名した。）
 
 `output/RNA_MassHunter_simple_report.xlsx` が生成される。`data/input/`（実mzML等の生データ）と`output/`（生成物）は`.gitignore`でリポジトリから除外されている。

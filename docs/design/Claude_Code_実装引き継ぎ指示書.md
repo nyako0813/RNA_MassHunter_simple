@@ -128,7 +128,7 @@ rna_masshunter_simple/
 | 1 | `rna_masshunter/formula_candidate.py` | ΔDaから元素組成候補を列挙するDFS探索（§8.1, §12） |
 | 2 | `rna_masshunter/mass_comparison.py`, `rna_masshunter/observed_mass.py` | Fragment×charge×PeakマッチングとMassComparisonRow生成（§8.2, §8.3, §15） |
 | 2.5 | `rna_masshunter/ms2_support.py` | MS2参考情報の付加（§8.5, §14A） |
-| 3 | `rna_masshunter/simple_pipeline.py`, `simple_main.py` | 全体オーケストレーション（§8.4） |
+| 3 | `rna_masshunter/simple_pipeline.py`, `main.py`（旧`simple_main.py`） | 全体オーケストレーション（§8.4） |
 | 4 | `rna_masshunter/excel_report.py`（新規ファイル、元の同名ファイルとは別物） | 01〜08シートのExcel出力（§16） |
 | 5 | `tests/test_formula_candidate.py`, `tests/test_mass_comparison.py`, `tests/test_ms2_support.py`, `tests/test_simple_pipeline.py` | 各フェーズのテスト（§19, §20） |
 | 6 | — | 実mzMLによる動作確認（§21、ユーザー立ち会い） |
@@ -154,7 +154,7 @@ rna_masshunter_simple/
 
 以下が揃った時点でこの引き継ぎのゴールとします。
 
-- `config.yaml` に実際のtRNA配列とmzMLパスを設定し、`python simple_main.py --config config.yaml` が例外なく完走する。
+- `config.yaml` に実際のtRNA配列とmzMLパスを設定し、`python main.py --config config.yaml` が例外なく完走する。
 - 出力Excel（`output/RNA_MassHunter_simple_report.xlsx`）に `01_Index` 〜 `07_Modifications` の全シートが存在し、`01_Index` の全リンクが機能する。
 - `06_Mass_Comparison` に、ΔDa/Δppm・Recommended Formula・Formula Candidates・Known Modification・Modification Candidatesの列が正しく埋まっている。
 - `formula_candidate.py` の原子数バイアス無しランキング（原則3項目）がテストで明示的に検証されている。
