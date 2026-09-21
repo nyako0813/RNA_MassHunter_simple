@@ -6,7 +6,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 
 ## 実装状況
 
-設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 145件通過、実データでのエンドツーエンド動作確認済み）。
+設計仕様書（`docs/design/RNA_MassHunter_再設計_実装仕様書.md`）§22のPhase 0〜9、および§24（Phase 10、P1完全分解モード）まで実装・検証済み（`pytest` 149件通過、実データでのエンドツーエンド動作確認済み）。
 
 `nyako0813/RNA_MassHunter`（大規模な既存リポジトリ）から移植した機能:
 
@@ -56,7 +56,7 @@ RNA/tRNA LC-MS/MSデータから、理論断片・観測MS1質量・元素組成
 「この位置にこの修飾があるはず」という仮説の理論質量が、生のMS1ピークに実在するかを確認する機能（仕様: `claude_code/hypothesis_mass_check_spec.md`）。**観測質量から修飾を自動同定することはしない**——ユーザーが指定した仮説について一致・不一致（Yes/No）を返すだけで、不一致の場合の候補生成もしない。P1モード・オリゴマーモードのどちらでも動作する。
 
 - 仮説は2系統をマージして同じ照合ロジックにかける。
-  - `sequence.trna_type`で選んだtRNAの`data/trna_library.yaml` `conserved_modifications`（Source = `trna_library_default`）。全58件に **position 15 = G+（archaeosine）** を機械的に付与してあるが、**要生物学的最終確認**（違う場合は該当エントリだけ手で修正・削除する）。
+  - `sequence.trna_type`で選んだtRNAの`data/trna_library.yaml` `conserved_modifications`（Source = `trna_library_default`）。全58件に **position 15 = G+（archaeosine）** を機械的に付与してあるが、**要生物学的最終確認**（違う場合は該当エントリだけ手で修正・削除する）。加えて`tRNA-Ile2-CAT-1-1`（アンチコドンCAU = tRNA-Ile(CAU)）にだけ、wobble位置の **C+（agmatidine）** を付与してある（*M. acetivorans* C2A Δhpt株のtRNAでLC-MS確認、Gregorova et al. 2020, RNA Biol, [DOI:10.1080/15476286.2020.1853385](https://doi.org/10.1080/15476286.2020.1853385)）。imG-14（position 37）はtRNAの割り当てが不明のため未追加。
   - `config.yaml`の`hypothesis_check.targets`（Source = `config_manual`、既定は空）。書式は`config.yaml`のコメント参照。
 - ターゲット形式は3種: `label`（カタログのヌクレオシド質量そのまま）／`components`+`linkage`（ジヌクレオチド。5'/3'は区別しない）／`base`+`add_elements`（カタログ質量+元素の単同位体質量）。ジヌクレオチドは N1 + N2 + HPO3 − H2O（`phosphorothioate`はさらに +S −O）で、本体RNA_MassHunterの`p1_sap_dinucleotide_candidates.py`と同じ元素組成モデル。
 - 各chargeを1〜`max_charge`と仮定して観測中性質量を逆算し、理論質量から`mass_tolerance_ppm`以内のピークを全て収集する。1仮説に複数ピークが一致すれば複数行に展開、一致無しは`Match_Found = No`の1行。Peak IDは04/05/06シートと共通。

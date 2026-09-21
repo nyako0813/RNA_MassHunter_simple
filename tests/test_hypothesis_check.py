@@ -63,6 +63,54 @@ def test_all_58_trna_entries_have_conserved_modifications_including_archaeosine_
         assert entry["sequence"][14] == "G", trna_id
 
 
+# --- agmatidine (C+) at the tRNA-Ile(CAU) wobble (agmatidine_conserved_modification_spec.md) ----
+
+ILE2_ID = "tRNA-Ile2-CAT-1-1"  # anticodon CAU = tRNA-Ile(CAU)
+
+
+def test_only_ile2_cau_trna_carries_agmatidine_at_its_wobble_position():
+    library = load_trna_library(REPO_ROOT / "data" / "trna_library.yaml")
+    entry = library[ILE2_ID]
+    mods = [(m["position"], m["modification"]) for m in entry["conserved_modifications"]]
+    assert mods == [(15, "G+"), (entry["wobble_position"], "C+")]
+    assert entry["sequence"][entry["wobble_position"] - 1] == "C"
+    assert entry["sequence"][entry["wobble_position"] - 1:][:3] == entry["anticodon"]
+    # every other entry keeps just the archaeosine default
+    for trna_id, other in library.items():
+        if trna_id != ILE2_ID:
+            assert [m["modification"] for m in other["conserved_modifications"]] == ["G+"], trna_id
+
+
+def test_agmatidine_catalog_mass_matches_cytidine_plus_agmatine_minus_water(catalog):
+    from rna_masshunter.elemental_composition import ElementalComposition
+    cytidine = ElementalComposition({"C": 9, "H": 13, "N": 3, "O": 5}).exact_mass
+    agmatine = ElementalComposition({"C": 5, "H": 14, "N": 4}).exact_mass
+    water = ElementalComposition({"H": 2, "O": 1}).exact_mass
+    assert catalog["C+"] == pytest.approx(355.1968, abs=1e-4)
+    assert catalog["C+"] == pytest.approx(cytidine + agmatine - water, abs=1e-3)
+
+
+def test_ile2_conserved_modifications_merge_into_two_hypotheses_and_both_are_checked(catalog, modifications):
+    library = load_trna_library(REPO_ROOT / "data" / "trna_library.yaml")
+    warnings: list[dict] = []
+    hypotheses = hypotheses_from_conserved_modifications(library[ILE2_ID], catalog, modifications, warnings)
+    assert [(h.name, round(h.theoretical_mass, 4), h.source) for h in hypotheses] == [
+        (f"{ILE2_ID} position 15 = G+", 324.1182, SOURCE_TRNA_LIBRARY_DEFAULT),
+        (f"{ILE2_ID} position 36 = C+", 355.1968, SOURCE_TRNA_LIBRARY_DEFAULT),
+    ]
+    assert warnings == []  # both targets match the base at their position
+
+    peaks = [
+        Peak(mz=mz_from_neutral_mass(324.1182, 1, "positive"), intensity=100.0),
+        Peak(mz=mz_from_neutral_mass(355.1968, 2, "positive"), intensity=200.0),
+    ]
+    rows = check_hypotheses(hypotheses, peaks, _config())
+    assert [(r.hypothesis_name, r.match_found, r.charge) for r in rows] == [
+        (f"{ILE2_ID} position 15 = G+", True, 1),
+        (f"{ILE2_ID} position 36 = C+", True, 2),
+    ]
+
+
 # --- §8-2/§8-3: theoretical masses ---------------------------------------------
 
 def test_dinucleotide_m22g_phosphorothioate_u_reproduces_real_data_mass(catalog):
@@ -408,6 +456,19 @@ def test_pipeline_unknown_config_label_fails_fast(tmp_path):
     """
     with pytest.raises(ValueError, match="NOT_A_LABEL"):
         simple_pipeline.run(_pipeline_config(tmp_path, "", yaml_text), project_root=REPO_ROOT)
+
+
+def test_pipeline_ile2_trna_type_checks_archaeosine_and_agmatidine(tmp_path, catalog):
+    mzml_path = tmp_path / "ile2.mzML"
+    _write_mzml(mzml_path, [
+        {"id": "scan=1", "ms_level": 1, "rt": 1.0, "mzs": [mz_from_neutral_mass(catalog["C+"], 1, "positive")], "intensities": [1000.0]},
+    ])
+    result = simple_pipeline.run(_pipeline_config(tmp_path, mzml_path, "", trna_type=ILE2_ID), project_root=REPO_ROOT)
+
+    found = {r.hypothesis_name: r.match_found for r in result["hypothesis_check_rows"]}
+    assert found == {f"{ILE2_ID} position 15 = G+": False, f"{ILE2_ID} position 36 = C+": True}
+    rows = {r[0].value: r[4].value for r in openpyxl.load_workbook(result["output_path"])["07b_Hypothesis_Check"].iter_rows(min_row=4)}
+    assert rows == {f"{ILE2_ID} position 15 = G+": "No", f"{ILE2_ID} position 36 = C+": "Yes"}
 
 
 # --- §8-4: real-data verification (needs the git-ignored raw mzML) ------------------------------

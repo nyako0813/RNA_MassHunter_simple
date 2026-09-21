@@ -390,6 +390,9 @@ trna_library:
   - position: 15
     modification: G+
     note: 'position 15 is G in nearly all elongator tRNAs; archaeosine (G+) is the default hypothesis but not guaranteed (要生物学的最終確認: edit or delete this entry per tRNA if wrong)'
+  - position: 36
+    modification: C+
+    note: agmatidine at wobble C34; confirmed by LC-MS in M. acetivorans C2A Δhpt tRNA (Gregorova et al. 2020, RNA Biol, DOI:10.1080/15476286.2020.1853385)
 - id: tRNA-iMet-CAT-1-1
   amino_acid: iMet
   anticodon: CAU
